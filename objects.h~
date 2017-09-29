@@ -6,10 +6,6 @@
 typedef struct _Object object;
 
 
-Object *objeto_crear();
-
-
-
 
 
 # endif
