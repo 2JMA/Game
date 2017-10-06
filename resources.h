@@ -8,6 +8,8 @@ typedef struct _Resource resource;
 
 resource* initResource(int type, int max, int min, int value);
 
+Status freeResource(resource* r);
+
 Status changeMax(resource* r, int max);
 
 Status changeMin(resource* r, int min);

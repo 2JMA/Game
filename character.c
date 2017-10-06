@@ -1,5 +1,6 @@
 #include "character.h"
 #include <string.h>
+#include <stdlib.h>
 
 typedef struct _Character{
 	char* name;
@@ -13,25 +14,29 @@ character* initCharacter(char *name, char *image, location *loc){
 	character* mChar = (character*)malloc(sizeof(character));
 	if (mChar==NULL)
 		return NULL;
-	char* mChar->name=(char*)malloc((strlen(name)+1)*sizeof(char));
+	mChar->name =(char*)malloc((strlen(name)+1)*sizeof(char));
 	if (mChar->name==NULL){
 		free(mChar);
-		return NULL
+		return NULL;
 	}
-	char* mChar->image = (char*) malloc((strlen(image)+1)*sizeof(char));
+	mChar->image = (char*) malloc((strlen(image)+1)*sizeof(char));
 	if (mChar->image==NULL){
 		free(mChar->name);
 		free(mChar);
 		return NULL;
 	}
 
-	location* mChar->loc=(location*)mallooc(sizeof(loc));
+	mChar->loc=(location*)malloc(sizeof(loc));
 	if (mChar->loc==NULL){
 		free(mChar->name);
 		free(mChar->image);
 		free(mChar);
 		return NULL;
 	}
+	strcpy(mChar->name, name);
+	strcpy(mChar->image, image);
+	mChar->loc->lat = loc->lat;
+	mChar->loc->lng = loc->lng;
 	return mChar;
 }
 
@@ -58,9 +63,9 @@ Status changeCharLocation(character *mChar, location *loc){
 	mChar->loc->lng = loc->lng;
 }
 
-Status moveChar(int x, int y){
-	if(mChar == NULL || loc == NULL) return ERROR;
+Status moveChar(location* loc, character *mChar){
+	if(mChar == NULL || loc == NULL || mChar->loc == NULL) return ERROR;
 
-	mChar->loc->lat += x;
-	mChar->loc->lng += y ;
+	mChar->loc->lat += loc->lat;
+	mChar->loc->lng += loc->lng;
 }

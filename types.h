@@ -9,9 +9,9 @@ typedef enum {
  FALSE = 0, TRUE = 1
 } Bool; 
 
-typedef struct location{
+typedef struct Location{
 	int lat;
 	int lng;
-};
+}location;
 
 #endif /* TYPES_H */

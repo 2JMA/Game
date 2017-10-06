@@ -39,7 +39,7 @@ Status changeMin(resource* r, int min){
 	if(r==NULL) return ERROR;
 	r->min = min;
 
-	if(value < min)
+	if(r->value < min)
 		r->value = min;
 	return OK;
 }

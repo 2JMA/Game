@@ -1,65 +1,69 @@
-#include <stdlib>
+#include <stdlib.h>
+#include <string.h>
 #include "objects.h"
-#include "resources.h"
+
 
 struct _Object{
 	int type;
 	int weight;
-	BOOL picked;
-	BOOL pickable;
+	Bool picked;
+	Bool pickable;
 	char* image;
 	location *loc;
-	resource *resources;
+	resource **resources;
+};
 
-}object;
+object *IniObject(int type, int weight, Bool picked, Bool pickable, char * image, location *loc, resource** resources){
 
-Location *Inilocation(int lat, int lng){
-
-	Location *loc;
-
-	loc= (Location*)malloc(sizeof(Location));
-	if (loc==NULL) return NULL;
-
-	loc->lat= lat;
-	loc->lng= lng;
-
-	return loc;
-}
-
-
-Object *IniObject(int type, int weight, BOOL picked, BOOL pickable, char * image, Location *loc, resources** resources){
-
-	Object *obj;
+	object *obj;
 
 	if (type==-1 || weight==-1 || image==NULL || loc==NULL || resources==NULL) return NULL;
 
-	obj= (obj*) malloc (sizeof(object));
+	obj= (object*) malloc (sizeof(object));
 	if (obj==NULL) return NULL;
 	obj->type = type;
 	obj->weight = weight;
 	obj->picked = picked;
 	obj->pickable = pickable;
-	obj->image = image;
-	obj->loc= loc;
-	obj->resources=resources;
+	obj->image = (char*)malloc(3*sizeof(char));
+	if(obj->image == NULL){
+		free(obj);
+		return NULL;
+	}
+	obj->loc= (location*)malloc(sizeof(location));
+	if(obj->loc == NULL){
+		free(obj->image);
+		free(obj);
+		return NULL;
+	}
+	obj->resources=(resource**)malloc(sizeof(resource*));
+	if(obj->resources == NULL){
+		free(obj->loc);
+		free(obj->image);
+		free(obj);
+		return NULL;
+	}
+
+	strcpy(obj->image, image);
+	obj->loc->lat = loc->lat;
+	obj->loc->lng = loc->lng;
 
 	return obj;
-
 }
 
-void freeObject (Object *obj){
+void freeObject (object *obj){
 
 	if(obj==NULL) return;
 
-	free(obj->image);
-	free(obj->loc);
-	free(obj->resources); //AHORA SE MIRA SHABALEH CON LA CALMA VIVA ESPAÑA VOLEM VOTAR VIVA AMOK OCILITE
+	if(obj->image != NULL) free(obj->image);
+	if(obj->loc != NULL)free(obj->loc);
+	if(obj->resources != NULL)free(obj->resources); 
 	free(obj);
 	return;
 
 }
 
-Status moveObject(Object *obj, Location *loc){
+Status moveObject(object *obj, location *loc){
 
 	if(obj==NULL || loc==NULL) return ERROR ;
 
@@ -70,7 +74,7 @@ Status moveObject(Object *obj, Location *loc){
 }
 
 
-Status PickObject (Object *obj){
+Status PickObject (object *obj){
 
 	if(obj==NULL) return ERROR;
 
