@@ -1,13 +1,6 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#define NUM_COLS 139
-#define NUM_ROWS 52
-#define OC_CHAR 1
-/*
-Number of rows and columns of the terminal
-Using tput cols and tput lines on the terminal*/
-
 typedef enum {
  ERROR = 0, OK = 1
 } Status;
@@ -17,8 +10,8 @@ typedef enum {
 } Bool; 
 
 typedef struct Location{
-	int x;
-	int y;
+	int lat;
+	int lng;
 }location;
 
 #endif /* TYPES_H */
