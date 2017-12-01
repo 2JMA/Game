@@ -9,6 +9,7 @@
 #include "nprint.h"
 #include "place.h"
 #include "image.h"
+#include "utils.h"
 
 
 
@@ -113,8 +114,11 @@ void main(){
 	char bearDraw[] = "ʕ•ᴥ•ʔ";
 	char cute[] = "(づ｡◕‿‿◕｡)づ";
 	char cute2[] = "｡◕‿‿◕｡";
+	char works1[] = "(ᵔᴥᵔ)";
+	char works2[] = "♡‿♡";
 	char test[] = "\n          ██████████            \n      ████          ████        \n    ██                  ██      \n  ██                      ██    \n  ██  ██  ██              ██    \n██    ██  ██        ████    ██  \n██                ██    ██  ██  \n██  ██  ██  ██          ██  ██  \n██  ██████████        ██      ██\n██  ██████████                ██\n  ██  ██████████              ██\n  ██  ██  ██  ██            ██  \n    ██                  ████    \n      ██████        ████        \n            ████████            ";
 	char test2[] = "██████████";
+	char *map;
 
 	if(f == NULL){
 		printf("Error al abrir el archivo");
@@ -124,12 +128,14 @@ void main(){
 	_term_init();
 	_init_screen();
 
-	Place *place = createPlace(10, 10, 2*NUM_ROWS/3, 2*NUM_COLS/3, OR_BG, WHITE_FG);
+	Place *place = createPlace(10, 10, 26, 54, OR_BG, WHITE_FG);
 	Image *iDraw = createImage(draw, 40, 20, OR_BG, CYAN_FG, place);
 	Image *iBear = createImage(bearDraw, 10, 20 , OR_BG, RED_FG, place);
 	Image *iCute = createImage(cute2, 40, 40 , OR_BG, YELLOW_FG, place);
 	Image *iTest = createImage(test, 20, 10 , CYAN_BG, MAGENTA_FG, place);
 
+	map=fileToStr("map.txt");
+	setUpPlace(place, map);
 	printPlace(place);
 	//imagePrint(iDraw);
 	imagePrint(iBear);
@@ -153,10 +159,10 @@ void main(){
 	while(1){
 
 		dir = _read_key();
-		Status r = imageMove(iCute, dir.x, dir.y);
-		printData(iCute);
+		Status r = imageMove(iBear, dir.x, dir.y);
+		/*printData(iBear);
 		
-		/*near1 = imagesNear(iCute, iBear); 
+		near1 = imagesNear(iCute, iBear); 
 
 		_move_cursor_to(0, 0);
 		printf("%d", r);*/

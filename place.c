@@ -69,8 +69,8 @@ void printPlace(Place *place){
 
 	for(j=0; j < place->nRows; j++){
 		for(i=0; i < place->nColumns; i++){
-			if(place->matrix[j][i] == 0)
-				printf("=");
+			if(place->matrix[j][i] != 0)
+				printf("%c", place->matrix[j][i]);
 		}
 		_move_cursor_to(place->iRow + j, place->iColumn);
 	}
