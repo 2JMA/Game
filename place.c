@@ -6,8 +6,10 @@
 #include <math.h>
 #include "types.h"
 #include "nprint.h"
+#include "utils.h"
 
 #include "place.h"
+
 
 /*Element to be printed an cleared.
 It is the main graphical element of the game.
@@ -19,45 +21,83 @@ struct _Place{
 	int bgColor, fgColor;
 	int iColumn, iRow;
 	int nColumns, nRows;
+	char wall, bg;
 };
 
-Place *createPlace(int r, int c, int nRows, int nColumns, int bgColor, int fgColor){
-	int i, j;
-	Place *place=(Place*)malloc(sizeof(place[0]));
+Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char wall, char bg){
+	int i, j, temp;
+	char *p, *map;
+	Status result;
+	if(fileName == NULL) return NULL;
+
+	map = fileToStr(fileName);
+	if(map == NULL) return NULL;
+
+	Place *place = (Place*)malloc(sizeof(place[0]));
 	if(place == NULL) return NULL;
 
 	place->bgColor = bgColor;
 	place->fgColor = fgColor;
+	place->wall = wall;
+	place->bg = bg;
 	place->iColumn = c;
 	place->iRow = r;
-	place->nColumns = nColumns;
-	place->nRows = nRows;
 
-	/*TODO FIX */
-	if(r+nRows > NUM_ROWS) place->nRows = NUM_ROWS - r -1;
-	if(c+nColumns > NUM_COLS) place->nRows = NUM_COLS - c -1;
 
-	place->matrix=(int **)malloc(sizeof(int*)*nRows);
+	//Get the number of rows and columns of the map, as if it was a matrix
+	for(p = map, place->nColumns = 0, place->nRows = 1, temp = 0; *p!='\0'; p++){
+		/*I don't know how it wors, it is from stackoverflow*/
+		if ((*p & 0xC0) != 0x80) ++temp;
+
+		if(*p=='\n'){
+			place->nRows += 1;
+			if(temp > place->nColumns){
+				//We don't want to count the \n
+				place->nColumns = temp-1;
+			}
+			temp = 0;
+		}
+	}
+
+	//Because the last char mey be a \0, not \n
+	if(temp > place->nColumns){
+		//We don't want to count the \n
+		place->nColumns=temp-1;
+	}
+
+	if(c + place->nColumns -1 > NUM_COLS) place->iColumn = NUM_COLS - place->nColumns;
+	if(r + place->nRows -1 > NUM_ROWS)  place->iRow = NUM_ROWS - place->nRows;
+
+	place->matrix=(int **)malloc(sizeof(int*)*(place->nRows));
 	if(place->matrix == NULL){
 		free(place);
+		free(map);
 		return NULL;
 	} 
 
-	for(i=0; i<nRows; i++){
+	for(i=0; i<place->nRows; i++){
 		/*Initialize all the map with zeros*/
-		place->matrix[i] = (int*)calloc(nColumns, sizeof(int));
+		place->matrix[i] = (int*)calloc(place->nColumns, sizeof(int));
 		if(place->matrix[i] == NULL){
 			for(j=i; j>=0; j--){
 				free(place->matrix[j]);
 			}
 			free(place->matrix);
 			free(place);
+			free(map);
 			return NULL;
 		}
 	}
 
-	return place;
+	result = setUpPlace(place, map);
+	if(result != OK){
+		freePlace(place);
+		free(map);
+		return NULL;
+	}
+	free(map);
 
+	return place;
 }
 
 void printPlace(Place *place){
@@ -65,14 +105,15 @@ void printPlace(Place *place){
 	if(place == NULL) return;
 
 	_prepare_font(place->bgColor, place->fgColor);
-    _move_cursor_to(place->iRow, place->iColumn);
 
 	for(j=0; j < place->nRows; j++){
-		for(i=0; i < place->nColumns; i++){
-			if(place->matrix[j][i] == 0)
-				printf("=");
-		}
 		_move_cursor_to(place->iRow + j, place->iColumn);
+		for(i=0; i < place->nColumns; i++){
+			if(place->matrix[j][i] == OC_CHAR)
+				printf("%c", place->wall);
+			else
+				printf("%c", place->bg);
+		}
 	}
 	
 	fflush(stdout);
@@ -98,9 +139,10 @@ Status setUpPlace(Place *p, char *data){
 	int i, j;
 	char *c;
 	if(p == NULL || data == NULL) return ERROR;
+
 	for(c = data, i=0, j=0; *c != '\0'; c++){
 		if(*c != '\n'){
-			if(j > p->nRows || i > p->nColumns) return ERROR;
+			if(j >= p->nRows || i >= p->nColumns) return ERROR;
 
 			if(*c != ' '){
 				p->matrix[j][i] = 1;
@@ -138,4 +180,24 @@ Status placeAvailable(Place *p, int xi, int xf, int yi, int yf){
 	}
 
 	return OK;
+}
+
+char placeGetWall(Place *p){
+	if(p == NULL) return ' ';
+	return p->wall;
+}
+
+char placeGetBg(Place *p){
+	if(p == NULL) return ' ';
+	return p->bg;
+}
+
+int placeGetBgColor(Place *p){
+	if(p == NULL) return -1;
+	return p->bgColor;
+}
+
+int placeGetFgColor(Place *p){
+	if(p == NULL) return -1;
+	return p->fgColor;
 }

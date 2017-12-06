@@ -1,0 +1,7 @@
+Para compilar, hasta ahora, solo la parte grafica:
+
+gcc main.c nprint.c nprint.h image.c image.h place.c place.h types.h utils.c utils.h -lm -g
+
+El -lm es necesario para que compile math.h
+El -g se puede quitar, pero al ponerlo, cuando lo ejecutas con valgrind, te dice la line donde esta el fallo
+Tendriamos que hacer un makefile

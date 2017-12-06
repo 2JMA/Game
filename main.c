@@ -1,7 +1,6 @@
 #include "types.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
 #include <termios.h>
 #include <pthread.h>
 #include <string.h>
@@ -9,6 +8,7 @@
 #include "nprint.h"
 #include "place.h"
 #include "image.h"
+#include "utils.h"
 
 
 
@@ -64,6 +64,22 @@ void _term_init() {
 						    before making this change*/
 }
 
+void _term_reset() {
+	struct termios new;	          /*a termios structure contains a set of attributes about 
+					  how the terminal scans and outputs data*/
+		
+	tcgetattr(fileno(stdin), &initial);    /*first we get the current settings of out 
+						 terminal (fileno returns the file descriptor 
+						 of stdin) and save them in initial. We'd better 
+						 restore them later on*/
+	new = initial;	                      /*then we copy them into another one, as we aren't going 
+						to change ALL the values. We'll keep the rest the same */
+
+	tcsetattr(fileno(stdin), TCSANOW, &new);  /*now we SET the attributes stored in new to the 
+						    terminal. TCSANOW tells the program not to wait 
+						    before making this change*/
+}
+
 location _read_key() {
 	char choice;
   	location dir;
@@ -96,77 +112,38 @@ location _read_key() {
  	return dir;   
 }
 
-void sleep(unsigned int miliSeconds){
-    clock_t goal = miliSeconds*1000 + clock();
-    while (goal > clock());
-}
-
 void main(){
 	int MAX_X, MAX_Y;
 	char line[MAX_LINE];
-	FILE *f = NULL;
-
-
-	f = fopen("draw.txt", "r");
-
-	char draw[] = "¯\\_(ツ)_/¯";
-	char bearDraw[] = "ʕ•ᴥ•ʔ";
-	char cute[] = "(づ｡◕‿‿◕｡)づ";
-	char cute2[] = "｡◕‿‿◕｡";
-	char test[] = "\n          ██████████            \n      ████          ████        \n    ██                  ██      \n  ██                      ██    \n  ██  ██  ██              ██    \n██    ██  ██        ████    ██  \n██                ██    ██  ██  \n██  ██  ██  ██          ██  ██  \n██  ██████████        ██      ██\n██  ██████████                ██\n  ██  ██████████              ██\n  ██  ██  ██  ██            ██  \n    ██                  ████    \n      ██████        ████        \n            ████████            ";
-	char test2[] = "██████████";
-
-	if(f == NULL){
-		printf("Error al abrir el archivo");
-		return;
-	}
+	char *map;
 
 	_term_init();
 	_init_screen();
 
-	Place *place = createPlace(10, 10, 2*NUM_ROWS/3, 2*NUM_COLS/3, OR_BG, WHITE_FG);
-	Image *iDraw = createImage(draw, 40, 20, OR_BG, CYAN_FG, place);
-	Image *iBear = createImage(bearDraw, 10, 20 , OR_BG, RED_FG, place);
-	Image *iCute = createImage(cute2, 40, 40 , OR_BG, YELLOW_FG, place);
-	Image *iTest = createImage(test, 20, 10 , CYAN_BG, MAGENTA_FG, place);
+	Place *place = createPlace(10, 10, "Maps/map.txt", OR_BG, YELLOW_FG, '#', '.');
 
+	Image *iBear = createImage("Images/bear.txt", 11, 20 , OR_BG, RED_FG, place);
+	
 	printPlace(place);
-	//imagePrint(iDraw);
 	imagePrint(iBear);
-	//imagePrint(iCute);
-	//imagePrint(iTest);
-
-	/*sleep(2000);
-	printf("HOLA\n");
-	sleep(5000);
-	nclear(i);*/
-
-	/*int i;
-	for(i=0; i<=14; i++){
-		sleep(200);
-		imageMove(iDraw, 1, 1);
-		imageMove(iCute, -2, -3);
-	}*/
 
 	location dir;
 	Bool near1;
-	while(1){
+	int times = 0;
+	while(times < 200){
 
 		dir = _read_key();
-		Status r = imageMove(iCute, dir.x, dir.y);
-		printData(iCute);
-		
-		/*near1 = imagesNear(iCute, iBear); 
+		Status r = imageMove(iBear, dir.x, dir.y);
+		times++;
+		/*
+		printImageData(iBear);
+		near1 = imagesNear(iCute, iBear);
 
 		_move_cursor_to(0, 0);
 		printf("%d", r);*/
 	}
 
-	freeImage(iDraw);
 	freeImage(iBear);
-	freeImage(iCute);
-	freeImage(iTest);
 	freePlace(place);
-
-	fclose(f);
+	_term_reset();
 }

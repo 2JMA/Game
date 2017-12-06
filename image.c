@@ -4,8 +4,8 @@
 #include <memory.h>
 #include <string.h>
 
-#include "types.h"
 #include "nprint.h"
+#include "utils.h"
 #include "image.h"
 
 /*Element to be printed an cleared.
@@ -22,25 +22,23 @@ struct _Image{
 };
 
 
-Image *createImage(char *src, int r, int c, int bgColor, int fgColor, Place *place){
+Image *createImage(char *fileName, int r, int c, int bgColor, int fgColor, Place *place){
 	Image *img;
-	char *p;
-	if(src == NULL) return NULL;
+	char *p, *src;
+	if(fileName == NULL) return NULL;
 	if(place == NULL) return NULL;
+	src = fileToStr(fileName);
+	if(src == NULL) return NULL;
+
 	img = (Image*)malloc(sizeof(Image));
 	if(img == NULL) return NULL;
-	
-	img->src =  strdup(src);
-	if(img->src == NULL){
-		free(img);
-		return NULL;
-	}
 
 	img->iColumn=c;
 	img->iRow=r;
 	img->bgColor = bgColor;
 	img->fgColor = fgColor;
 	img->place = place;
+	img->src = src;
 
 	//Get the number of rows and columns of the str, as if it was a matrix
 	int temp;
@@ -94,7 +92,7 @@ Status imageChangePosition(Image *img, int x, int y){
 	if(x + img->nColumns -1 > NUM_COLS) return ERROR;
 	if(y + img->nRows -1 > NUM_ROWS) return ERROR;
 
-	result = placeAvailable(img->place, x, x + img->nColumns, y, y + img->nRows + 1);
+	result = placeAvailable(img->place, x, x + img->nColumns, y, y + img->nRows);
 	if(result != 1){
 		return result;
 	}
@@ -173,34 +171,9 @@ int getImageCols(Image *img){
 }
 
 /*Just for debugging, print the image info in the left upper corner*/
-int printData(Image *i){
+int printImageData(Image *i){
 	_move_cursor_to(0, 0);
 	printf("%d, %d\n%d, %d", i->iColumn, i->iRow, i->nColumns, i->nRows);
-}
-
-int imagePrint2(Image *img){
-    int n, i, nRows;
-    char *p;
-    if(img == NULL) return -1;
-
-    _prepare_font(img->bgColor, img->fgColor);
-    _move_cursor_to(img->iRow, img->iColumn);
-    
-    for(p=img->src, nRows = 0; *p!='\0'; p++){
-		/*I don't know how it wors, it is from stackoverflow*/
-		if ((*p & 0xC0) != 0x80){
-			n+=printf(" ");
-		}
-
-		if(*p=='\n'){
-			_move_cursor_to(img->iRow + nRows, img->iColumn);
-    		nRows++;
-		}
-	}
-    
-    fflush(stdout);
-    _prepare_font(OR_BG, OR_FG);
-    return n;
 }
 
 int imagePrint(Image *img){
@@ -218,8 +191,8 @@ int imagePrint(Image *img){
     	if(img->src[i] != '\n'){
     		n += printf("%c", img->src[i]);
     	}else{
-    		_move_cursor_to(img->iRow + nRows, img->iColumn);
     		nRows++;
+    		_move_cursor_to(img->iRow + nRows, img->iColumn);
     	}
     	i++;
     }
@@ -231,15 +204,17 @@ int imagePrint(Image *img){
 
 void imageClear(Image *img){
     int i, j, nRows;
+    char bg;
     if(img == NULL) return;
 
-    _prepare_font(OR_BG, 35);
+    _prepare_font(placeGetBgColor(img->place), placeGetFgColor(img->place));
     _move_cursor_to(img->iRow, img->iColumn);
+    bg = placeGetBg(img->place);
     
     for(i=0; i < img->nRows ; i++){
     	_move_cursor_to(img->iRow + i, img->iColumn);
    		for(j=0; j< img->nColumns; j++) {
-    		printf(" ");
+    		printf("%c", bg);
     	}
     }
 
