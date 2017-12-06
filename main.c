@@ -115,15 +115,13 @@ location _read_key() {
 void main(){
 	int MAX_X, MAX_Y;
 	char line[MAX_LINE];
-	char *map;
 
 	_term_init();
 	_init_screen();
 
 	Place *place = createPlace(10, 10, "Maps/map.txt", OR_BG, YELLOW_FG, '#', '.');
-
 	Image *iBear = createImage("Images/bear.txt", 11, 20 , OR_BG, RED_FG, place);
-	
+
 	printPlace(place);
 	imagePrint(iBear);
 
@@ -138,7 +136,6 @@ void main(){
 		/*
 		printImageData(iBear);
 		near1 = imagesNear(iCute, iBear);
-
 		_move_cursor_to(0, 0);
 		printf("%d", r);*/
 	}
