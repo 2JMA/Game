@@ -23,7 +23,7 @@ Status imageMove(Image *img, int lat, int lng);
 Status imageSmoothMoveTo(Image *img, int lat, int lng);
 Status imageSmoothMove(Image *img, int lat, int lng);
 
-Bool imagesNear(Image *img1, Image *img2);
+Position imagesNear(Image *img1, Image *img2);
 int getImageX(Image *img);
 int getImageY(Image *img);
 int getImageRows(Image *img);

@@ -130,10 +130,99 @@ Status imageSmoothMove(Image *img, int x, int y){
 	
 }
 
+/*Auxiliar image to detect wether to images are really near or not
+It returns FALSE if not and TRUE if yes.
+TODO RETURN INTS SO THAT WE KNOW IF THEY ARE NEAR OR THEY ARE TOUCHING EACH OTHER
+
+This is obviously not efficient at all, but it was the best way i have found to solve this problem.
+We alloc two more rows and columns than necessary in order to check if the sides of a point are occupied or not
+Otherwise we may get a core violation error
+*/
+Position imagesNearAux(Image *img1, Image *img2){
+	short **matrix, flag;
+	int xMin, xMax, yMin, yMax;
+	int i, j;
+	Position result = FAR;
+	if(img1 ==  NULL || img2 == NULL) return FAR;
+
+	if(img1->iColumn < img2->iColumn){
+		xMin = img1->iColumn;
+	}else{
+		xMin = img2->iColumn;
+	}
+
+	if(img1->iRow < img2->iRow){
+		yMin = img1->iRow;
+	}else{
+		yMin = img2->iRow;
+	}
+
+	if((img1->iColumn + img1->nColumns) < (img2->iColumn + img2->nColumns)){
+		xMax = img2->iColumn + img2->nColumns;
+	}else{
+		xMax = img1->iColumn + img1->nColumns;
+	}
+
+	if((img1->iRow + img1->nRows) < (img2->iRow + img2->nRows)){
+		yMax = img2->iRow + img2->nRows;
+	}else{
+		yMax = img1->iRow + img1->nRows;
+	}
+
+	matrix = (short **)malloc(sizeof(short*)*(yMax - yMin + 3));
+	if(matrix == NULL){
+		return FAR;
+	} 
+
+	for(i=0; i<(yMax - yMin + 3); i++){
+		matrix[i] = (short*)calloc((xMax - xMin + 3),sizeof(short));
+		if(matrix[i] == NULL){
+			for(j=i; j>=0; j--){
+				free(matrix[j]);
+			}
+			free(matrix);
+			return FAR;
+		}
+	}
+
+	/*Once we have the matrix, we print the images inside and see if they are near or not*/
+	/*Print the first image*/
+	for(i=(img1->iRow - yMin + 1); i<(img1->iRow + img1->nRows - yMin  + 1); i++){
+		for(j=(img1->iColumn - xMin + 1); j<(img1->iColumn + img1->nColumns - xMin  + 1); j++){
+			matrix[i][j]=1;
+		}
+	}
+
+	for(i=(img2->iRow - yMin + 1), flag=0; i<(img2->iRow + img2->nRows - yMin + 1); i++){
+		for(j=(img2->iColumn - xMin + 1); j<(img2->iColumn + img2->nColumns - xMin + 1); j++){
+
+			if(matrix[i][j]==1){
+				/*Uno esta encima del otro*/
+				result = INSIDE;
+				flag = 1;
+				break;
+			}
+			if(matrix[i-1][j]==1 || matrix[i+1][j]==1 || matrix[i][j-1]==1 || matrix[i][j+1]==1){
+				/*Estan cerca*/
+				result = NEAR;
+				flag = 1;
+				break;
+			}
+		}
+		if(flag == 1) break;
+	}
+
+	for(i=0; i<(yMax - yMin + 1); i++){
+		free(matrix[i]);
+	}
+	free(matrix);
+	return result;
+}
+
 /*Return TRUE just if the two images are strictly next to each other*/
-Bool imagesNear(Image *img1, Image *img2){
+Position imagesNear(Image *img1, Image *img2){
 	int c1x, c2x, c1y, c2y;
-	if(img1 ==  NULL || img2 == NULL) return FALSE;
+	if(img1 ==  NULL || img2 == NULL) return FAR;
 
 	c1x = img1->iColumn + img1->nColumns/2;
 	c2x = img2->iColumn + img2->nColumns/2;
@@ -141,13 +230,17 @@ Bool imagesNear(Image *img1, Image *img2){
 	c2y = img2->iRow + img2->nRows/2;
 
 	double dist = sqrt( pow(c1x-c2x, 2) + pow(c1y-c2y, 2));
-	double rad1 = 2*(img1->nColumns/2 +img1->nRows/2)/3;
-	double rad2 = 2*(img2->nColumns/2 + img2->nRows/2)/3;
+	double rad1 = sqrt( pow(img1->nColumns, 2) + pow(img1->nRows, 2));
+	double rad2 = sqrt( pow(img2->nColumns, 2) + pow(img2->nRows, 2));
+	double radMax = rad1;
+	if(rad1 < rad2) radMax = rad2;
 
-	_move_cursor_to(0, 0);
-	printf("\n\n%f, %f\n %f, %f", dist, rad1+rad2, rad1, rad2);
+	/*_move_cursor_to(0, 0);
+	printf("\n\n%f, %f\n %f, %f", dist, rad1+rad2, rad1, rad2);*/
 
-	return dist <= rad1+rad2;
+	if(dist > radMax) return FAR;
+
+	return imagesNearAux(img1, img2);
 }
 
 int getImageX(Image *img){

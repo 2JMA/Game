@@ -121,23 +121,26 @@ void main(){
 
 	Place *place = createPlace(10, 10, "Maps/map.txt", OR_BG, YELLOW_FG, '#', '.');
 	Image *iBear = createImage("Images/bear.txt", 11, 20 , OR_BG, RED_FG, place);
+	Image *iCute = createImage("Images/emoji2.txt", 15, 20 , OR_BG, CYAN_FG, place);
 
 	printPlace(place);
 	imagePrint(iBear);
+	imagePrint(iCute);
 
 	location dir;
-	Bool near1;
+	Position near1;
 	int times = 0;
 	while(times < 200){
 
 		dir = _read_key();
-		Status r = imageMove(iBear, dir.x, dir.y);
+		imageMove(iBear, dir.x, dir.y);
 		times++;
 		/*
 		printImageData(iBear);
+		*/
 		near1 = imagesNear(iCute, iBear);
 		_move_cursor_to(0, 0);
-		printf("%d", r);*/
+		printf("%d", near1);
 	}
 
 	freeImage(iBear);

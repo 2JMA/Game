@@ -16,6 +16,10 @@ typedef enum {
  FALSE = 0, TRUE = 1
 } Bool; 
 
+typedef enum {
+ FAR = 0, NEAR = 1, INSIDE = 2
+} Position;
+
 typedef struct Location{
 	int x;
 	int y;
