@@ -189,58 +189,82 @@ void main(){
 	Image *im3 = createImage("Images/3.txt", 14, 25 , OR_BG, CYAN_FG, place);
 	Image *win = createImage("Images/win.txt", 23, 25 , OR_BG, CYAN_FG, place);
 	Image *lose = createImage("Images/lose.txt", 23, 25 , OR_BG, CYAN_FG, place);
+	Image *again = createImage("Images/again.txt", 23, 25 , OR_BG, CYAN_FG, place);
 
 
 	printPlace(place);
-	imagePrint(iBear);
-	imagePrint(im1);
-	imagePrint(im2);
-	imagePrint(im3);
-
-	pthread_create(&p1,NULL,thread_function_move_recta1, im1);
-	pthread_create(&p2,NULL,thread_function_move_recta2, im2);
-	pthread_create(&p3,NULL,thread_function_move_cuadrado1, im3);
+	
 
 	location dir;
 	Position near1,near2,near3;
-	int times = 0;
-	while(times < 200){
+	int times = 0, i=1, fwin=0;
 
-		dir = _read_key();
-		imageMove(iBear, dir.x, dir.y);
-		times++;
-		/*
-		printImageData(iBear);
-		*/
-		near1 = imagesNear(im1, iBear);
-		near2 = imagesNear(im2, iBear);
-		near3 = imagesNear(im3, iBear);
-		_move_cursor_to(0, 0);
-		printf("%d, %d", getImageX(iBear),getImageY(iBear));
+	/*LEVEL 1*/
+	while(i<=5){
+		imagePrint(iBear);
+		imagePrint(im1);
+		imagePrint(im2);
+		imagePrint(im3);
+
+		pthread_create(&p1,NULL,thread_function_move_recta1, im1);
+		pthread_create(&p2,NULL,thread_function_move_recta2, im2);
+		pthread_create(&p3,NULL,thread_function_move_cuadrado1, im3);
+		while(times < 200){
+
+			dir = _read_key();
+			imageMove(iBear, dir.x, dir.y);
+			times++;
+			/*
+			printImageData(iBear);
+			*/
+			near1 = imagesNear(im1, iBear);
+			near2 = imagesNear(im2, iBear);
+			near3 = imagesNear(im3, iBear);
+			_move_cursor_to(0, 0);
+			printf("%d, %d", getImageX(iBear),getImageY(iBear));
 		
-		/*printf("%d", near1);
-		printf("%d", near2);
-		printf("%d", near3);
-		*/
-		if ((near1==2)||(near2==2)||(near3==2)){
-			times=200;
-			imageClear(im1);
-			imageClear(im2);
-			imageClear(im3);
-			imagePrint(lose);
-			_move_cursor_to(0, 0);
+			/*printf("%d", near1);
+			printf("%d", near2);
+			printf("%d", near3);
+			*/
+			if ((near1==2)||(near2==2)||(near3==2)){
+				times=200;
+				pthread_cancel(p1);
+				pthread_cancel(p2);
+				pthread_cancel(p3);
+				imageClear(im1);
+				imageClear(im2);
+				imageClear(im3);
+				imageClear(iBear);
+				imagePrint(lose);
+				_move_cursor_to(0, 0);
+				break;
 			
+			}
+			else if ((getImageX(iBear)==61) && (getImageY(iBear)==35)){
+				times=200;
+				pthread_cancel(p1);
+				pthread_cancel(p2);
+				pthread_cancel(p3);
+				imageClear(im1);
+				imageClear(im2);
+				imageClear(im3);
+				imageClear(iBear);
+				imagePrint(win);
+				_move_cursor_to(0, 0);
+				fwin=1;
+				break;
+			}
+
 		}
-		else if ((getImageX(iBear)==61) && (getImageY(iBear)==35)){
-			times=200;
-			imageClear(im1);
-			imageClear(im2);
-			imageClear(im3);
-			imagePrint(win);
-			_move_cursor_to(0, 0);
-			
-		}
+		sleep(5000);
+		if (fwin==1) break;
+		imagePrint(again);
 	}
+
+	imageClear(win);
+	/*LEVEL 2*/
+
 	pthread_cancel(p1);
 	pthread_cancel(p2);
 	pthread_cancel(p3);
