@@ -76,7 +76,7 @@ void imageClear(Image *img){
     fflush(stdout);
 }*/
 
-int nprint(char *text, int bgColor, int fgColor, int r, int c);{
+int nprint(char *text, int bgColor, int fgColor, int r, int c){
     int n;
     _prepare_font(bgColor, fgColor);
     _move_to(r, ic);
