@@ -123,8 +123,52 @@ void thread_function_move_recta1(Image* im){
 			sleep(200);
 		}
 
-		for(i=20; i>=1; i--){
+		for(i=1; i<=20; i++){
 			imageMove(im, -1, 0);
+			sleep(200);
+		}
+	}
+}
+
+void thread_function_move_recta2(Image* im){
+	if (im==NULL) return;
+	int i;
+
+	while(1){
+		for(i=1; i<=20; i++){
+			imageMove(im, -1, 0);
+			sleep(200);
+		}
+
+		for(i=1; i<=20; i++){
+			imageMove(im, 1, 0);
+			sleep(200);
+		}
+	}
+}
+
+void thread_function_move_cuadrado1(Image* im){
+	if (im==NULL) return;
+	int i;
+
+	while(1){
+		for(i=1; i<=20; i++){
+			imageMove(im, 1, 0);
+			sleep(200);
+		}
+
+		for(i=1; i<=20; i++){
+			imageMove(im, 0, 1);
+			sleep(200);
+		}
+
+		for(i=1; i<=20; i++){
+			imageMove(im, -1, 0);
+			sleep(200);
+		}
+
+		for(i=1; i<=20; i++){
+			imageMove(im, 0, -1);
 			sleep(200);
 		}
 	}
@@ -133,23 +177,32 @@ void thread_function_move_recta1(Image* im){
 void main(){
 	int MAX_X, MAX_Y;
 	char line[MAX_LINE];
-	pthread_t p1, p2;
+	pthread_t p1, p2, p3;
 
 	_term_init();
 	_init_screen();
 
 	Place *place = createPlace(10, 10, "Maps/map3.txt", OR_BG, YELLOW_FG, '#', '.');
-	Image *iBear = createImage("Images/bear.txt", 12, 20 , OR_BG, RED_FG, place);
-	Image *im = createImage("Images/prueba.txt", 15, 20 , OR_BG, CYAN_FG, place);
+	Image *iBear = createImage("Images/prueba.txt", 12, 20 , OR_BG, RED_FG, place);
+	Image *im1 = createImage("Images/1.txt", 15, 20 , OR_BG, CYAN_FG, place);
+	Image *im2 = createImage("Images/2.txt", 20, 40 , OR_BG, CYAN_FG, place);
+	Image *im3 = createImage("Images/3.txt", 14, 25 , OR_BG, CYAN_FG, place);
+	Image *win = createImage("Images/win.txt", 23, 25 , OR_BG, CYAN_FG, place);
+	Image *lose = createImage("Images/lose.txt", 23, 25 , OR_BG, CYAN_FG, place);
+
 
 	printPlace(place);
 	imagePrint(iBear);
-	imagePrint(im);
+	imagePrint(im1);
+	imagePrint(im2);
+	imagePrint(im3);
 
-	pthread_create(&p1,NULL,thread_function_move_recta1, im);
+	pthread_create(&p1,NULL,thread_function_move_recta1, im1);
+	pthread_create(&p2,NULL,thread_function_move_recta2, im2);
+	pthread_create(&p3,NULL,thread_function_move_cuadrado1, im3);
 
 	location dir;
-	Position near1;
+	Position near1,near2,near3;
 	int times = 0;
 	while(times < 200){
 
@@ -159,17 +212,43 @@ void main(){
 		/*
 		printImageData(iBear);
 		*/
-		near1 = imagesNear(im, iBear);
+		near1 = imagesNear(im1, iBear);
+		near2 = imagesNear(im2, iBear);
+		near3 = imagesNear(im3, iBear);
 		_move_cursor_to(0, 0);
-		printf("%d", near1);
-		if (near1==2){
+		printf("%d, %d", getImageX(iBear),getImageY(iBear));
+		
+		/*printf("%d", near1);
+		printf("%d", near2);
+		printf("%d", near3);
+		*/
+		if ((near1==2)||(near2==2)||(near3==2)){
 			times=200;
+			imageClear(im1);
+			imageClear(im2);
+			imageClear(im3);
+			imagePrint(lose);
+			_move_cursor_to(0, 0);
+			
+		}
+		else if ((getImageX(iBear)==61) && (getImageY(iBear)==35)){
+			times=200;
+			imageClear(im1);
+			imageClear(im2);
+			imageClear(im3);
+			imagePrint(win);
+			_move_cursor_to(0, 0);
+			
 		}
 	}
 	pthread_cancel(p1);
+	pthread_cancel(p2);
+	pthread_cancel(p3);
 
 	freeImage(iBear);
-	freeImage(im);
+	freeImage(im1);
+	freeImage(im2);
+	freeImage(im3);
 	freePlace(place);
 	_term_reset();
 	return;
