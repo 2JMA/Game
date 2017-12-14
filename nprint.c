@@ -74,14 +74,14 @@ void imageClear(Image *img){
     	printf("\n");
     }
     fflush(stdout);
-}
+}*/
 
-int nPrint(Image *img, int bgColor, int fgColor){
+int nprint(char *text, int bgColor, int fgColor, int r, int c);{
     int n;
     _prepare_font(bgColor, fgColor);
-    _move_to(img->iRow, img->iColumn);
-    n = printf("%s", img->src);
+    _move_to(r, ic);
+    n = printf("%s", text);
     fflush(stdout);
     _prepare_font(OR_BG, OR_FG);
     return n;
-}*/
+}
