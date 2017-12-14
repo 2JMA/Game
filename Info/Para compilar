@@ -5,3 +5,10 @@ gcc main.c nprint.c nprint.h image.c image.h place.c place.h types.h utils.c uti
 El -lm es necesario para que compile math.h
 El -g se puede quitar, pero al ponerlo, cuando lo ejecutas con valgrind, te dice la line donde esta el fallo
 Tendriamos que hacer un makefile
+
+
+Para compilar el thread:
+
+gcc mainimpossible.c nprint.c nprint.h image.c image.h place.c place.h types.h utils.c utils.h -lm -g -pthread
+
+El -pthread es para que funcionen los threads y no ponga "referencia a thread sin definir"
