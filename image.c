@@ -120,9 +120,54 @@ Status imageMove(Image *img, int x, int y){
 	imagePrint(img);
 	return result;
 }
+
+/*Aux strunct to pass the arguments*/
+struct thread_args{
+    Image *img; 
+    int x, y, time;
+};
+
+/*Auxiliar function to move the image slowly to an exact position*/
+Status imageSmoothMoveToAux(struct thread_args args){
+	int i, j;
+	Status result;
+	if(args.img->iColumn == args.x){
+		int diff = args.y - args.img->iRow;
+		int s = diff/abs(diff);
+		for(i=0; i<diff; i + s){
+			result = imageMove(args.img, 0, s);
+			if(result == ERROR)
+				pthread_exit(OK);
+			sleep(200);
+		}
+		return OK;
+	}else if(args.img->iRow == args.y){
+		int diff = args.x - args.img->iColumn;
+		int s = diff/abs(diff);
+		for(i=0; i<diff; i + s){
+			result = imageMove(args.img, s, 0);
+			if(result == ERROR)
+				pthread_exit(ERROR);
+			sleep(200);
+		}
+		pthread_exit(OK);
+	}else{
+
+	}
+}
+
 /*Move the image slowly to an exact position*/
-Status imageSmoothMoveTo(Image *img, int x, int y){
-	
+Status imageSmoothMoveTo(Image *img, int x, int y, int time){
+	pthread_t p;
+	Status result;
+	struct thread_args args;
+	args.img = img;
+	args.x = x;
+	args.y = y;
+	args.time = time;
+	pthread_create(&p, NULL, imageSmoothMoveToAux , args);
+	pthread_create(&p, &result);
+	return result;
 }
 
 /*Move the image slowly by incrementing its position*/

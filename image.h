@@ -20,7 +20,7 @@ Status imageChangePosition(Image *img, int lat, int lng);
 void imageChangeColor(Image *img, int bgColor, int fgColor);
 Status imageMoveTo(Image *img, int lat, int lng);
 Status imageMove(Image *img, int lat, int lng);
-Status imageSmoothMoveTo(Image *img, int lat, int lng);
+Status imageSmoothMoveTo(Image *img, int lat, int lng, int time);
 Status imageSmoothMove(Image *img, int lat, int lng);
 
 Position imagesNear(Image *img1, Image *img2);
