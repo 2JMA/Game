@@ -79,7 +79,7 @@ void imageClear(Image *img){
 int nprint(char *text, int bgColor, int fgColor, int r, int c){
     int n;
     _prepare_font(bgColor, fgColor);
-    _move_to(r, ic);
+    _move_cursor_to(r, c);
     n = printf("%s", text);
     fflush(stdout);
     _prepare_font(OR_BG, OR_FG);
