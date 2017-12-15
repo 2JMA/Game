@@ -24,14 +24,6 @@ int _get_screen_dim(int *x, int*y){
     scanf("\033[%d;%dR", y, x);
 }
 
-void _show_cursor(){
-     printf("%c[?25h", 27);
-}
-
-void _remove_cursor(){
-    printf("%c[?25l", 27);
-}
-
 /*
   Moves the cursor into a window position, translating it into
   absolute screen positions. Note the "+1" used to translate from the
@@ -55,7 +47,6 @@ void _init_screen(){
 	printf("%c[3;3;100t", 27);*/
     _prepare_font(OR_BG, OR_FG);
     _clean_screen();
-    _remove_cursor();
 }
 
 /*int imagePrint(Image *img){
@@ -88,7 +79,7 @@ void imageClear(Image *img){
 int nprint(char *text, int bgColor, int fgColor, int r, int c){
     int n;
     _prepare_font(bgColor, fgColor);
-    _move_cursor_to(r, c);
+    _move_to(r, ic);
     n = printf("%s", text);
     fflush(stdout);
     _prepare_font(OR_BG, OR_FG);

@@ -52,3 +52,10 @@ void sleep(unsigned int miliSeconds){
     clock_t goal = miliSeconds*1000 + clock();
     while (goal > clock());
 }
+
+/*Aux strunct to pass the arguments
+The first image is the one compared to the others*/
+struct thread_near_args{
+    Image **img; 
+    int numImg;
+};

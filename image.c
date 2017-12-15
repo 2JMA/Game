@@ -93,7 +93,7 @@ Status imageChangePosition(Image *img, int x, int y){
 	if(y + img->nRows -1 > NUM_ROWS) return ERROR;
 
 	result = placeAvailable(img->place, x, x + img->nColumns, y, y + img->nRows);
-	if(result != 1){
+	if(result != OK){
 		return result;
 	}
 
@@ -125,33 +125,52 @@ Status imageMove(Image *img, int x, int y){
 struct thread_args{
     Image *img; 
     int x, y, time;
+    Status result;
 };
 
 /*Auxiliar function to move the image slowly to an exact position*/
-Status imageSmoothMoveToAux(struct thread_args args){
+Status imageSmoothMoveToAux(void *arguments){
 	int i, j;
 	Status result;
-	if(args.img->iColumn == args.x){
-		int diff = args.y - args.img->iRow;
+	struct thread_args *args;
+	if(arguments == NULL) return ERROR;
+	args = (struct thread_args *)arguments;
+
+	if(args->img->iColumn == args->y){
+		printf("Caso 1\n");
+		/*We need the number of positions and the sign of the slide*/
+		int diff = args->x - args->img->iRow;
 		int s = diff/abs(diff);
+		diff = abs(diff);
 		for(i=0; i<diff; i + s){
-			result = imageMove(args.img, 0, s);
-			if(result == ERROR)
-				pthread_exit(OK);
-			sleep(200);
+			result = imageMove(args->img, 0, s);
+			if(result != OK){
+				//printf("ERROR: %d\n", result);
+				args->result = result;
+				pthread_exit();
+			}
+			sleep(args->time);
 		}
-		return OK;
-	}else if(args.img->iRow == args.y){
-		int diff = args.x - args.img->iColumn;
+		args->result = OK;
+		pthread_exit();
+	}else if(args->img->iRow == args->x){
+		printf("Caso 2\n");
+		int diff = args->y - args->img->iColumn;
 		int s = diff/abs(diff);
+		diff = abs(diff);
 		for(i=0; i<diff; i + s){
-			result = imageMove(args.img, s, 0);
-			if(result == ERROR)
-				pthread_exit(ERROR);
-			sleep(200);
+			result = imageMove(args->img, s, 0);
+			if(result != OK){
+				//printf("ERROR: %d\n", result);
+				args->result = result;
+				pthread_exit();
+			}
+			sleep(args->time);
 		}
-		pthread_exit(OK);
+		args->result = OK;
+		pthread_exit();
 	}else{
+		printf("Caso 3\n");
 
 	}
 }
@@ -160,13 +179,16 @@ Status imageSmoothMoveToAux(struct thread_args args){
 Status imageSmoothMoveTo(Image *img, int x, int y, int time){
 	pthread_t p;
 	Status result;
-	struct thread_args args;
-	args.img = img;
-	args.x = x;
-	args.y = y;
-	args.time = time;
+	struct thread_args *args;
+	args = (struct thread_args *) malloc(sizeof(struct thread_args));
+	args->img = img;
+	args->x = x;
+	args->y = y;
+	args->time = time;
+	args->result = OK;
+
 	pthread_create(&p, NULL, imageSmoothMoveToAux , args);
-	pthread_create(&p, &result);
+	pthread_join(&p, NULL);
 	return result;
 }
 
