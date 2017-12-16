@@ -174,6 +174,23 @@ void thread_function_move_cuadrado1(Image* im){
 	}
 }
 
+void thread_function_imagesNear(Image **image){
+	if (image==NULL) return;
+	int i;
+
+	while(1){
+		for(i=1; i<=20; i++){
+			imageMove(im, -1, 0);
+			sleep(200);
+		}
+
+		for(i=1; i<=20; i++){
+			imageMove(im, 1, 0);
+			sleep(200);
+		}
+	}
+}
+
 void main(){
 	int MAX_X, MAX_Y;
 	char line[MAX_LINE];
@@ -183,24 +200,28 @@ void main(){
 	_init_screen();
 
 	Place *place = createPlace(10, 10, "Maps/map3.txt", OR_BG, YELLOW_FG, '#', '.');
-	Image *iBear = createImage("Images/prueba.txt", 12, 20 , OR_BG, RED_FG, place);
-	Image *im1 = createImage("Images/1.txt", 15, 20 , OR_BG, CYAN_FG, place);
-	Image *im2 = createImage("Images/2.txt", 20, 40 , OR_BG, CYAN_FG, place);
-	Image *im3 = createImage("Images/3.txt", 14, 25 , OR_BG, CYAN_FG, place);
+	Image *iBear = createImage("Images/prueba.txt", 11, 11 , OR_BG, RED_FG, place);
+	Image *im1 = createImage("Images/1.txt", 15, 22 , OR_BG, CYAN_FG, place);
+	Image *im2 = createImage("Images/2.txt", 18, 40 , OR_BG, CYAN_FG, place);
+	Image *im3 = createImage("Images/3.txt", 14, 15 , OR_BG, CYAN_FG, place);
 	Image *win = createImage("Images/win.txt", 23, 25 , OR_BG, CYAN_FG, place);
 	Image *lose = createImage("Images/lose.txt", 23, 25 , OR_BG, CYAN_FG, place);
 	Image *again = createImage("Images/again.txt", 23, 25 , OR_BG, CYAN_FG, place);
 
 
-	printPlace(place);
 	
 
 	location dir;
 	Position near1,near2,near3;
-	int times = 0, i=1, fwin=0;
+	int times = 0, i=0, fwin=0, op=0;
 
 	/*LEVEL 1*/
-	while(i<=5){
+	while(i<2){
+		imageMoveTo(iBear, 11, 11);
+		imageMoveTo(im1, 15, 22);
+		imageMoveTo(im2, 18, 40);
+		imageMoveTo(im3, 14, 15);
+		printPlace(place);
 		imagePrint(iBear);
 		imagePrint(im1);
 		imagePrint(im2);
@@ -228,41 +249,40 @@ void main(){
 			printf("%d", near3);
 			*/
 			if ((near1==2)||(near2==2)||(near3==2)){
-				times=200;
 				pthread_cancel(p1);
 				pthread_cancel(p2);
 				pthread_cancel(p3);
-				imageClear(im1);
-				imageClear(im2);
-				imageClear(im3);
-				imageClear(iBear);
+				printPlace(place);
 				imagePrint(lose);
-				_move_cursor_to(0, 0);
 				break;
 			
 			}
 			else if ((getImageX(iBear)==61) && (getImageY(iBear)==35)){
-				times=200;
 				pthread_cancel(p1);
 				pthread_cancel(p2);
 				pthread_cancel(p3);
-				imageClear(im1);
-				imageClear(im2);
-				imageClear(im3);
-				imageClear(iBear);
+				printPlace(place);
 				imagePrint(win);
-				_move_cursor_to(0, 0);
+				sleep(2000);
+				
 				fwin=1;
 				break;
 			}
 
 		}
-		sleep(5000);
 		if (fwin==1) break;
-		imagePrint(again);
+		printf("aqiu llego");
+		sleep(2000);
+		printPlace(place);
+		if (i<1) imagePrint(again);
+		sleep(2000);		
+		i++;
+		if (i==1) op=1;
 	}
-
-	imageClear(win);
+	_move_cursor_to(0, 0);
+	if (op=1) printf("No te quedan oportunidades");
+	printPlace(place);
+	
 	/*LEVEL 2*/
 
 	pthread_cancel(p1);
