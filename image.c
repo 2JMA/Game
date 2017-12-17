@@ -3,6 +3,7 @@
 #include <string.h>
 #include <memory.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "nprint.h"
 #include "utils.h"
@@ -129,7 +130,7 @@ struct thread_args{
 };
 
 /*Auxiliar function to move the image slowly to an exact position*/
-Status imageSmoothMoveToAux(void *arguments){
+void *imageSmoothMoveToAux(void *arguments){
 	int i, j;
 	Status result;
 	struct thread_args *args;
@@ -137,7 +138,7 @@ Status imageSmoothMoveToAux(void *arguments){
 	args = (struct thread_args *)arguments;
 
 	if(args->img->iColumn == args->y){
-		printf("Caso 1\n");
+		//printf("Caso 1\n");
 		/*We need the number of positions and the sign of the slide*/
 		int diff = args->x - args->img->iRow;
 		int s = diff/abs(diff);
@@ -147,14 +148,14 @@ Status imageSmoothMoveToAux(void *arguments){
 			if(result != OK){
 				//printf("ERROR: %d\n", result);
 				args->result = result;
-				pthread_exit();
+				pthread_exit(NULL);
 			}
 			sleep(args->time);
 		}
 		args->result = OK;
-		pthread_exit();
+		pthread_exit(NULL);
 	}else if(args->img->iRow == args->x){
-		printf("Caso 2\n");
+		//printf("Caso 2\n");
 		int diff = args->y - args->img->iColumn;
 		int s = diff/abs(diff);
 		diff = abs(diff);
@@ -163,14 +164,14 @@ Status imageSmoothMoveToAux(void *arguments){
 			if(result != OK){
 				//printf("ERROR: %d\n", result);
 				args->result = result;
-				pthread_exit();
+				pthread_exit(NULL);
 			}
 			sleep(args->time);
 		}
 		args->result = OK;
-		pthread_exit();
+		pthread_exit(NULL);
 	}else{
-		printf("Caso 3\n");
+		//printf("Caso 3\n");
 
 	}
 }
@@ -187,8 +188,8 @@ Status imageSmoothMoveTo(Image *img, int x, int y, int time){
 	args->time = time;
 	args->result = OK;
 
-	pthread_create(&p, NULL, imageSmoothMoveToAux , args);
-	pthread_join(&p, NULL);
+	pthread_create(&p, NULL, imageSmoothMoveToAux, (void *)args);
+	pthread_join(p, NULL);
 	return result;
 }
 
