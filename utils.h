@@ -8,6 +8,7 @@ The first image is the one compared to the others*/
 typedef struct thread_near_args{
     Image **img; 
     int numImg;
+    int pos;
 }thread_near_args;
 
 char *fileToStr(char *file);
