@@ -1,8 +1,14 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-typedef struct thread_near_args thread_near_args;
+#include "image.h"
 
+/*Aux strunct to pass the arguments
+The first image is the one compared to the others*/
+typedef struct thread_near_args{
+    Image **img; 
+    int numImg;
+}thread_near_args;
 
 char *fileToStr(char *file);
 
