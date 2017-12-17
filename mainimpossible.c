@@ -9,9 +9,6 @@
 #include "place.h"
 #include "image.h"
 #include "utils.h"
-#include <pthread.h>
-
-
 
 //From nprint
 #define OR_BG 40
