@@ -144,8 +144,8 @@ Status setUpPlace(Place *p, char *data){
 		if(*c != '\n'){
 			if(j >= p->nRows || i >= p->nColumns) return ERROR;
 
-			if(*c != ' '){
-				p->matrix[j][i] = 1;
+			if(*c != ' ' && *c != '\0'){
+				p->matrix[j][i] = OC_CHAR;
 			}else{
 				p->matrix[j][i] = 0;
 			}
