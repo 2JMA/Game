@@ -9,9 +9,6 @@
 #include "place.h"
 #include "image.h"
 #include "utils.h"
-#include <pthread.h>
-
-
 
 //From nprint
 #define OR_BG 40
@@ -33,7 +30,6 @@
 #define BLACK_FG 30
 
 struct termios initial;
-int near = 0;
 
 /*
   Initializes the terminal in such a way that we can read the input
@@ -82,49 +78,52 @@ void _term_reset() {
 						    before making this change*/
 }
 
-location _read_key() {
+void *thread_read_key(void *direction) {
 	char choice;
-  	location dir;
- 	choice = fgetc(stdin);
+	location *dir;
 
-	dir.x = 0;
- 	dir.y = 0;
+ 	dir = (location *)direction;
 
-	if (choice == 27 && fgetc(stdin) == '[') { /* The key is an arrow key */
-	    choice = fgetc(stdin);
-
-	    switch(choice) {
-		    case('A'):
-		  	    dir.y = -1;
-		   		break;
-		    case('B'):
-		      	dir.y = 1;
-		      	break;
-		    case('C'):
-		      	dir.x = 1;
-		      	break;
-		    case('D'):
-		      	dir.x = -1;
-		      	break;
-	    }
-  	}else{
-  		dir.x = -1;
-		dir.y = -1;
-  	}
- 	return dir;   
+ 	while(1){
+ 		choice = fgetc(stdin);
+ 		if (choice == 27 && fgetc(stdin) == '[') { /* The key is an arrow key */
+ 		    choice = fgetc(stdin);
+ 	
+ 		    switch(choice) {
+ 			    case('A'):
+ 			  	    dir->y = -1;
+ 			   		break;
+ 			    case('B'):
+ 			      	dir->y = 1;
+ 			      	break;
+ 			    case('C'):
+ 			      	dir->x = 1;
+ 			      	break;
+ 			    case('D'):
+ 			      	dir->x = -1;
+ 			      	break;
+ 		    }
+ 	  	}
+ 	
+ 	 	choice = 0;
+ 	 	sleep(100);
+ 	}
 }
 
-void thread_imagesNear(void *arguments){
+void* thread_imagesNear(void *arguments){
 	int i;
 	Position p;
-	if(args == NULL) return;
+	if(arguments == NULL) return NULL;
 	thread_near_args *args;
 	args = (thread_near_args *)arguments;
 	while(1){
 		for(i=1; i<args->numImg; i++){
 			p = imagesNear(args->img[0], args->img[i]);
-			near = 1;
-			if(p == INSIDE) return;
+			if(p == INSIDE){
+				args->pos = p;
+				pthread_exit(NULL);
+				return NULL;
+			}
 		}
 	}
 }
@@ -132,11 +131,14 @@ void thread_imagesNear(void *arguments){
 void main(){
 	int MAX_X, MAX_Y;
 	char line[MAX_LINE];
+	pthread_t read_keys, near_thread;
+	location dir;
+	thread_near_args args;
 
 	_term_init();
 	_init_screen();
 
-	Place *place = createPlace(0, 0, "Maps/square1.txt", OR_BG, YELLOW_FG, '#', '.');
+	Place *place = createPlace(1, 1, "Maps/square1.txt", OR_BG, YELLOW_FG, '#', '.');
 	Image *iBear = createImage("Images/bear.txt", 12, 20 , OR_BG, RED_FG, place);
 	Image *evil = createImage("Images/emoji2.txt", 23, 25 , OR_BG, CYAN_FG, place);
 	Image *bullet1 = createImage("Images/bullet.txt", 21, 22 , OR_BG, YELLOW_FG, place);
@@ -148,19 +150,36 @@ void main(){
 	imagePrint(evil);
 	imagePrint(bullet1);
 	imagePrint(bullet2);
-	imageSmoothMoveTo(bullet1, 0, 22, 50);
+	//imageSmoothMoveTo(bullet1, 0, 22, 50);
 
-	location dir;
-	Position near1,near2,near3;
+	Image *imgs[] = {iBear, evil, bullet1, bullet2};
+	args.img = imgs;
+	args.numImg = 4;
+	args.pos = 0;
+
 	int times = 0;
-	while(near = 0){
+	dir.x = 0;
+	dir.y = 0;
 
-		dir = _read_key();
-		imageMove(iBear, dir.x, dir.y);
-		times++;
-		
+	pthread_create(&read_keys, NULL, thread_read_key, &dir);
+	pthread_create(&near_thread, NULL, thread_imagesNear, &args);
+	while(args.pos == 0){
+
+		if(dir.x !=0 || dir.y != 0){
+			imageMove(iBear, dir.x, dir.y);
+			imagePrint(bullet1);
+			imagePrint(bullet2);
+			imagePrint(evil);
+			dir.x = 0;
+			dir.y = 0;
+			times++;
+		}
 	}
 
+	printf("Acabado\n");
+
+	pthread_cancel(read_keys);
+	//pthread_cancel(near_thread);
 	freeImage(iBear);
 	freeImage(evil);
 	freeImage(bullet1);
