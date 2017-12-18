@@ -7,19 +7,17 @@ struct _Object{
 	Bool picked;
 	Bool pickable;
 	char* name;
-	char* image;
-	int lat;
-	int lng;
+	Image* image;
 	int num_res;
 	int* resources;
 };
 
-object *iniObject(char* name, int type, Bool picked, Bool pickable, char* image, int lat, int lng, int num_res, int* resources){
+object *iniObject(char* name, int type, Bool picked, Bool pickable, Image* image, int num_res, int* resources){
 
 	object *obj;
 	int i;
 
-	if (type==-1 || image==NULL || resources==NULL) return NULL;
+	if (type==-1 || image==NULL) return NULL;
 
 	obj= (object*) malloc (sizeof(object));
 	if (obj==NULL) return NULL;
@@ -32,24 +30,27 @@ object *iniObject(char* name, int type, Bool picked, Bool pickable, char* image,
 		return NULL;
 	}
 	obj->num_res=num_res;
-	obj->resources=(int*)malloc(sizeof(int)*num_res);
-	if(obj->resources == NULL){
-		free(obj->name);
-		free(obj);
-		return NULL;
+	if(resources==NULL){
+		obj->resources=NULL;
+	}else{
+		obj->resources=(int*)malloc(sizeof(int)*num_res);
+		if(obj->resources == NULL){
+			free(obj->name);
+			free(obj);
+			return NULL;
+		}
+	
+		for(i=0;i<num_res;i++){
+			obj->resources[i]=resources[i];
+		}
 	}
-	for(i=0;i<num_res;i++){
-		obj->resources[i]=resources[i];
-	}
-	obj->image=strdup(image);
+	obj->image=image;
 	if(obj->image==NULL){
 		free(obj->name);
-		free(obj->resources);
+		if(obj->resources) free(obj->resources);
 		free(obj);
 		return NULL;
 	}
-	obj->lat = lat;
-	obj->lng = lng;
 
 	return obj;
 }
@@ -59,22 +60,11 @@ void freeObject (object *obj){
 	if(obj==NULL) return;
 
 	if(obj->name != NULL) free(obj->name);
-	if(obj->image != NULL) free(obj->image);
+	if(obj->image!=NULL) freeImage(obj->image);
 	if(obj->resources != NULL)free(obj->resources); 
 	free(obj);
 	
 	return;
-
-}
-
-Status moveObject(object *obj, int lat, int lng){
-
-	if(obj==NULL) return ERROR ;
-
-	obj->lat=lat;
-	obj->lng=lng;
-
-	return OK;
 
 }
 
@@ -124,21 +114,19 @@ Status objectSetPickable(object* obj, Bool pickable){
 	return OK;
 }
 
-Status objectSetImage(object* obj, char* image){
-	if((obj==NULL)||(obj->type==-1)) return ERROR;
+Status objectSetImage(object* obj, Image* image){
+	if((obj==NULL)||(obj->type==-1)||(image==NULL)) return ERROR;
 
 	if(obj->image) free(obj->image);
-	obj->image=strdup(image);
+	obj->image=image;
 	if(obj->image==NULL) return ERROR;
 	
 	return OK;
 }
 
-Status objectSetLocation(object* obj, int lat, int lng){
+Status objectSetLocation(object* obj, int x, int y){
 	if((obj==NULL)||(obj->type==-1)) return ERROR;
-	obj->lat=lat;
-	obj->lng=lng;
-	return OK;
+	return imageMoveTo(obj->image, x, y);
 }
 
 Status objectSetResources(object* obj, int* res, int num_res){
@@ -164,7 +152,7 @@ int objectGetType(object* obj){
 char* objectGetName(object* obj){
 	if((obj==NULL)||(obj->type==-1)) return NULL;
 	
-	return strdup(obj->name);
+	return obj->name;
 }
 
 Bool objectGetPicked(object* obj){
@@ -179,20 +167,20 @@ Bool objectGetPickable(object* obj){
 	return obj->pickable;
 }
 
-char* objectGetImage(object* obj){
-	if((obj==NULL)||(obj->type==-1)) return NULL;
+Image* objectGetImage(object* obj){
+	if((obj==NULL)||(obj->type==-1)||(obj->image==NULL)) return NULL;
 	
-	return strdup(obj->image);
+	return obj->image;
 }
 
-int* objectGetLocation(object* obj){
-	if((obj==NULL)||(obj->type==-1)) return NULL;
-	
-	int* loc=(int*)malloc(sizeof(int)*2);
-	loc[0]=obj->lat;
-	loc[1]=obj->lng;
-	
-	return loc;
+int objectGetX(object* obj){
+	if((obj==NULL)||(obj->type==-1)||(obj->image==NULL)) return -1;
+	return getImageX(obj->image);
+}
+
+int objectGetY(object* obj){
+	if((obj==NULL)||(obj->type==-1)||(obj->image==NULL)) return -1;
+	return getImageY(obj->image);
 }
 
 int* objectGetResources(object* obj){
@@ -219,7 +207,7 @@ object* objectSearch(int type, object** obj){
 }
 
 
-object** getObjectsFromFile(char* file){
+/*object** getObjectsFromFile(char* file){
 	if(file==NULL) return NULL;
 
 	object** obj;
@@ -335,7 +323,7 @@ object** getObjectsFromFile(char* file){
 	fclose(pf);
 	
 	return obj;
-}
+}*/
 
 
 

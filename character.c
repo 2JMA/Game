@@ -1,13 +1,14 @@
 #include "character.h"
+#include "image.h"
+#include "nprint.h"
 #include <string.h>
 #include <stdlib.h>
+#define CYAN_BG 46
 
 struct _Character{
 	int type;
 	char* name;
-	char* image;
-	int x;
-	int y;
+	Image* image;
 	object* obj;
 	/*they have only 1 object so it's object* and not object** */
 	/*if it has no object this field is NULL*/
@@ -17,7 +18,7 @@ struct _Character{
 	char* info;	
 };
 
-character* iniCharacter(char *name, char *image, int x, int y, int type, object* obj, object* needs, char* info){
+character* iniCharacter(char *name, Image *image, int type, object* obj, object* needs, char* info){
 	if(name == NULL || image == NULL) return NULL;
 
 	character* mChar = (character*)malloc(sizeof(character));
@@ -28,22 +29,26 @@ character* iniCharacter(char *name, char *image, int x, int y, int type, object*
 		free(mChar);
 		return NULL;
 	}
-	mChar->image = strdup(image);
+	mChar->image = image;
 	if (mChar->image==NULL){
 		free(mChar->name);
 		free(mChar);
 		return NULL;
 	}
 	if(info==NULL){
-		info = strdup("cero");
+		mChar->info = strdup("cero");
+	}else{
+		mChar->info=strdup(info);
+		if(mChar->info==NULL){
+			freeImage(mChar->image);
+			free(mChar->name);
+			free(mChar);
+			return NULL;
+		}
 	}
-	mChar->info=strdup(info);
 	mChar->needs = needs;
 	mChar->obj = obj;
 	mChar->type = type;
-	mChar->y = y;
-	mChar->x = x;
-	
 	return mChar;
 }
 
@@ -53,8 +58,11 @@ Status freeCharacter(character *mChar){
 	if(mChar->name != NULL)
 		free(mChar->name);
 
+	if(mChar->info != NULL)
+		free(mChar->info);
+
 	if(mChar->image != NULL)
-		free(mChar->image);
+		freeImage(mChar->image);
 
 	free(mChar);
 
@@ -97,6 +105,18 @@ int charGetType(character* mChar){
 	return mChar->type;
 }
 
+Status charSetObject(character* mChar, object* obj){
+	if(mChar==NULL) return ERROR;
+	mChar->obj=obj;
+	return OK;
+}
+
+Status charSetNeeds(character* mChar, object* obj){
+	if(mChar==NULL) return ERROR;
+	mChar->needs=obj;
+	return OK;
+}
+
 object* charGetObject(character* mChar){
 	if(mChar==NULL) return NULL;
 	return mChar->obj;
@@ -112,19 +132,23 @@ char* charGetInfo(character* mChar){
 	return mChar->info;
 }
 
-int* charGetLoc(character* mChar){
-	int loc[2];
-	loc[0]=mChar->x;
-	loc[1]=mChar->y;
-	return loc;
+
+int charGetX(character* mChar){
+	if((mChar==NULL)||(mChar->image==NULL)) return X_ELSE;
+	return getImageX(mChar->image);
+}
+
+int charGetY(character* mChar){
+	if((mChar==NULL)||(mChar->image==NULL)) return Y_ELSE;
+	return getImageY(mChar->image);
 }
 
 character* charGetNextTo(character** chars){
 	if(chars==NULL) return NULL;
 
 	int i;
-	for(i=1; chars[i]; i++){
-		if(NextTo(chars[0], chars[i])) return chars[i];
+	for(i=1; chars[i]!=NULL; i++){
+		if(imagesNear(chars[0]->image, chars[i]->image)==1||imagesNear(chars[0]->image, chars[i]->image)==2) return chars[i];
 	}
 	return NULL;
 }
@@ -136,25 +160,22 @@ Status charPrintInfo(character** chars){
 	char* s;
 	mChar=charGetNextTo(chars);
 	if(mChar==NULL){
-		IMPRIMIR("No hay nadie al lado");
+		nprint("No hay nadie al lado.\n", OR_BG, CYAN_BG, 1, 1);
 		return OK;
 	}
-	switch(charactergetType(mChar)){
-		case():
-			s=charGetInfo(mChar);
-			if(strcmp(s,"cero")==0){
-				IMPRIMIR("No tiene nada que decir");
-				return OK;
-			}
-			IMPRIMIR("%s", s);
-			return OK;
-	}		
-	return ERROR;
+	s=charGetInfo(mChar);
+	if(s==NULL) return ERROR;
+	if(strcmp(s,"cero")==0){
+		nprint("No tiene nada que decir.\n", OR_BG, CYAN_BG, 1, 1);
+		return OK;
+	}
+	nprint(s, OR_BG, CYAN_BG, 1, 1);
+	return OK;
 }
 
 
 
-character** getCharactersFromFile(char* file, object** objects){
+/*character** getCharactersFromFile(char* file, object** objects){
 	if(file==NULL) return NULL;
 
 	character** c;
@@ -273,6 +294,6 @@ character** getCharactersFromFile(char* file, object** objects){
 	fclose(pf);
 	return c;
 }
-
+*/
 	
 
