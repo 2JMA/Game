@@ -172,19 +172,19 @@ int main(){
 	_term_init();
 	_init_screen();
 
-	map=createPlace(1, 1, "/home/alumnos/e356636/Desktop/Exchanges/Maps/map.txt", OR_BG, WHITE_FG, '#', '.');
+	map=createPlace(1, 1, "./Maps/map.txt", OR_BG, WHITE_FG, '#', '.');
 
-	player=createImage( "/home/alumnos/e356636/Desktop/Exchanges/Images/prueba.txt", 13, 40, OR_BG, CYAN_FG, map);
+	player=createImage( "./Images/prueba.txt", 13, 40, OR_BG, CYAN_FG, map);
 
-	ai=createImage( "/home/alumnos/e356636/Desktop/Exchanges/Images/1.txt", 3, 3, OR_BG, RED_FG, map);
-	bi=createImage( "/home/alumnos/e356636/Desktop/Exchanges/Images/2.txt", 3, 50, OR_BG, RED_FG, map);
-	ci=createImage( "/home/alumnos/e356636/Desktop/Exchanges/Images/3.txt", 22, 3, OR_BG, RED_FG, map);
-	di=createImage( "/home/alumnos/e356636/Desktop/Exchanges/Images/prueba.txt", 22, 49, OR_BG, RED_FG, map);
-	obj1=createImage( "/home/alumnos/e356636/Desktop/Exchanges/Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
-	obj2=createImage( "/home/alumnos/e356636/Desktop/Exchanges/Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
-	obj3=createImage( "/home/alumnos/e356636/Desktop/Exchanges/Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
-	obj4=createImage( "/home/alumnos/e356636/Desktop/Exchanges/Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
-	obj5=createImage( "/home/alumnos/e356636/Desktop/Exchanges/Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
+	ai=createImage( "./Images/1.txt", 3, 3, OR_BG, RED_FG, map);
+	bi=createImage( "./Images/2.txt", 3, 50, OR_BG, RED_FG, map);
+	ci=createImage( "./Images/3.txt", 22, 3, OR_BG, RED_FG, map);
+	di=createImage( "./Images/prueba.txt", 22, 49, OR_BG, RED_FG, map);
+	obj1=createImage( "./Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
+	obj2=createImage( "./Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
+	obj3=createImage( "./Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
+	obj4=createImage( "./Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
+	obj5=createImage( "./Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
 
 
 	foto=iniObject("foto", 1, 1, 0, obj1, 0, NULL);
