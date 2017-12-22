@@ -115,12 +115,12 @@ void thread_function_move_recta1(Image* im){
 	int i;
 
 	while(1){
-		for(i=1; i<=20; i++){
+		for(i=1; i<=30; i++){
 			imageMove(im, 1, 0);
 			sleep(200);
 		}
 
-		for(i=1; i<=20; i++){
+		for(i=1; i<=30; i++){
 			imageMove(im, -1, 0);
 			sleep(200);
 		}
@@ -132,12 +132,12 @@ void thread_function_move_recta2(Image* im){
 	int i;
 
 	while(1){
-		for(i=1; i<=20; i++){
+		for(i=1; i<=30; i++){
 			imageMove(im, -1, 0);
 			sleep(200);
 		}
 
-		for(i=1; i<=20; i++){
+		for(i=1; i<=30; i++){
 			imageMove(im, 1, 0);
 			sleep(200);
 		}
@@ -149,29 +149,29 @@ void thread_function_move_cuadrado1(Image* im){
 	int i;
 
 	while(1){
-		for(i=1; i<=20; i++){
+		for(i=1; i<=30; i++){
 			imageMove(im, 1, 0);
 			sleep(200);
 		}
 
-		for(i=1; i<=20; i++){
+		for(i=1; i<=10; i++){
 			imageMove(im, 0, 1);
 			sleep(200);
 		}
 
-		for(i=1; i<=20; i++){
+		for(i=1; i<=30; i++){
 			imageMove(im, -1, 0);
 			sleep(200);
 		}
 
-		for(i=1; i<=20; i++){
+		for(i=1; i<=10; i++){
 			imageMove(im, 0, -1);
 			sleep(200);
 		}
 	}
 }
 
-void thread_function_imagesNear(Image **image){
+/*void thread_function_imagesNear(Image **image){
 	if (image==NULL) return;
 	int i;
 
@@ -187,6 +187,7 @@ void thread_function_imagesNear(Image **image){
 		}
 	}
 }
+*/
 
 void main(){
 	int MAX_X, MAX_Y;
@@ -196,24 +197,96 @@ void main(){
 	_term_init();
 	_init_screen();
 
-	Place *place = createPlace(10, 10, "Maps/map3.txt", OR_BG, YELLOW_FG, '#', '.');
-	Image *iBear = createImage("Images/prueba.txt", 11, 11 , OR_BG, RED_FG, place);
-	Image *im1 = createImage("Images/1.txt", 15, 22 , OR_BG, CYAN_FG, place);
-	Image *im2 = createImage("Images/2.txt", 18, 40 , OR_BG, CYAN_FG, place);
-	Image *im3 = createImage("Images/3.txt", 14, 15 , OR_BG, CYAN_FG, place);
-	Image *win = createImage("Images/win.txt", 23, 25 , OR_BG, CYAN_FG, place);
-	Image *lose = createImage("Images/lose.txt", 23, 25 , OR_BG, CYAN_FG, place);
-	Image *again = createImage("Images/again.txt", 23, 25 , OR_BG, CYAN_FG, place);
-
-
+	Place *place = createPlace(1, 1, "Maps/map3.txt", OR_BG, YELLOW_FG, '#', '.');
+	Image *iBear = createImage("Images/prueba.txt", 2, 2 , OR_BG, RED_FG, place);
+	Image *im1 = createImage("Images/1.txt", 6, 10 , OR_BG, CYAN_FG, place);
+	Image *im2 = createImage("Images/2.txt", 16, 40 , OR_BG, CYAN_FG, place);
+	Image *im3 = createImage("Images/3.txt", 8, 15 , OR_BG, CYAN_FG, place);
 	
-
 	location dir;
 	Position near1,near2,near3;
 	int times = 0, i=0, fwin=0, op=0;
 
 	/*LEVEL 1*/
 	while(i<2){
+		nprint("                                                                         \n", OR_BG, OR_BG, 28, 2);
+		nprint("LEVEL 1\n", OR_BG, OR_BG, 28, 2);
+		imageMoveTo(iBear, 2, 2);
+		imageMoveTo(im1, 6, 10);
+		imageMoveTo(im2, 16, 40);
+		imageMoveTo(im3, 8, 15);
+		printPlace(place);
+		imagePrint(iBear);
+		imagePrint(im1);
+		imagePrint(im2);
+		imagePrint(im3);
+
+		pthread_create(&p1,NULL,thread_function_move_recta1, im1);
+		pthread_create(&p2,NULL,thread_function_move_recta2, im2);
+		pthread_create(&p3,NULL,thread_function_move_cuadrado1, im3);
+		while(times < 200){
+
+			dir = _read_key();
+			imageMove(iBear, dir.x, dir.y);
+			times++;
+			
+			near1 = imagesNear(im1, iBear);
+			near2 = imagesNear(im2, iBear);
+			near3 = imagesNear(im3, iBear);
+			_move_cursor_to(29, 2);
+			nprint("                           \n", OR_BG, OR_BG, 29, 2);
+			_move_cursor_to(29, 2);
+			printf("%d, %d", getImageY(iBear),getImageX(iBear));
+		
+			if ((near1==2)||(near2==2)||(near3==2)){
+				pthread_cancel(p1);
+				pthread_cancel(p2);
+				pthread_cancel(p3);
+				printPlace(place);
+				nprint("                                                                         \n", OR_BG, OR_BG, 28, 2);
+				nprint("OOH YOU HAVE LOST\n", OR_BG, OR_BG, 28, 2);
+				sleep(2000);
+				break;
+			
+			}
+			else if ((getImageY(iBear)==26) && (getImageX(iBear)==52)){
+				pthread_cancel(p1);
+				pthread_cancel(p2);
+				pthread_cancel(p3);
+				printPlace(place);
+				nprint("                                                                         \n", OR_BG, OR_BG, 28, 2);
+				nprint("CONGRATS! YOU PASSED THIS LEVEL\n", OR_BG, OR_BG, 28, 2);
+				sleep(2000);
+				fwin=1;
+				break;
+			}
+
+		}
+		if (fwin==1) break;		
+		else if (i<1) {
+			nprint("                                                                         \n", OR_BG, OR_BG, 28, 2);
+			nprint("DONT WORRY, YOU CAN TRY AGAIN\n", OR_BG, OR_BG, 28, 2);
+			sleep(2000);
+			}		
+		else if (i==1) {
+			nprint("                                                                         \n", OR_BG, OR_BG, 28, 2);
+			nprint("YOU DONT HAVE MORE OPORTUNITIES, LETS GO TO THE NEXT LEVEL\n", OR_BG, OR_BG, 28, 2);
+			sleep(2000);
+		}
+		i++;
+	}
+	pthread_cancel(p1);
+	pthread_cancel(p2);
+	pthread_cancel(p3);
+
+	/*LEVEL 2*/	
+	times= 0;
+	i=0;
+	fwin=0;
+	op=0;
+	while(i<2){
+		nprint("                                                                         \n", OR_BG, OR_BG, 28, 2);
+		nprint("LEVEL 2\n", OR_BG, OR_BG, 28, 2);
 		imageMoveTo(iBear, 11, 11);
 		imageMoveTo(im1, 15, 22);
 		imageMoveTo(im2, 18, 40);
@@ -232,60 +305,137 @@ void main(){
 			dir = _read_key();
 			imageMove(iBear, dir.x, dir.y);
 			times++;
-			/*
-			printImageData(iBear);
-			*/
+			
 			near1 = imagesNear(im1, iBear);
 			near2 = imagesNear(im2, iBear);
 			near3 = imagesNear(im3, iBear);
-			_move_cursor_to(0, 0);
-			printf("%d, %d", getImageX(iBear),getImageY(iBear));
-		
-			/*printf("%d", near1);
-			printf("%d", near2);
-			printf("%d", near3);
-			*/
+			_move_cursor_to(29, 2);
+			nprint("                           \n", OR_BG, OR_BG, 29, 2);
+			_move_cursor_to(29, 2);
+			printf("%d, %d", getImageY(iBear),getImageX(iBear));
 			if ((near1==2)||(near2==2)||(near3==2)){
 				pthread_cancel(p1);
 				pthread_cancel(p2);
 				pthread_cancel(p3);
 				printPlace(place);
-				imagePrint(lose);
+				nprint("                                                                         \n", OR_BG, OR_BG, 28, 2);
+				nprint("OOH YOU HAVE LOST\n", OR_BG, OR_BG, 28, 2);
+				sleep(2000);
 				break;
 			
 			}
-			else if ((getImageX(iBear)==61) && (getImageY(iBear)==35)){
+			else if ((getImageY(iBear)==26) && (getImageX(iBear)==52)){
 				pthread_cancel(p1);
 				pthread_cancel(p2);
 				pthread_cancel(p3);
 				printPlace(place);
-				imagePrint(win);
+				nprint("                                                                         \n", OR_BG, OR_BG, 28, 2);
+				nprint("CONGRATS! YOU PASSED THIS LEVEL\n", OR_BG, OR_BG, 28, 2);
 				sleep(2000);
-				
 				fwin=1;
 				break;
 			}
 
 		}
-		if (fwin==1) break;
-		printf("aqiu llego");
-		sleep(2000);
-		printPlace(place);
-		if (i<1) imagePrint(again);
-		sleep(2000);		
+		if (fwin==1) break;		
+		else if (i<1) {
+			nprint("                                                                         \n", OR_BG, OR_BG, 28, 2);
+			nprint("DONT WORRY, YOU CAN TRY AGAIN\n", OR_BG, OR_BG, 28, 2);
+			sleep(2000);
+			}		
+		else if (i==1) {
+			nprint("                                                                         \n", OR_BG, OR_BG, 28, 2);
+			nprint("YOU DONT HAVE MORE OPORTUNITIES, LETS GO TO THE NEXT LEVEL\n", OR_BG, OR_BG, 28, 2);
+			sleep(2000);
+		}
 		i++;
-		if (i==1) op=1;
 	}
-	_move_cursor_to(0, 0);
-	if (op=1) printf("No te quedan oportunidades");
-	printPlace(place);
-	
-	/*LEVEL 2*/
-
 	pthread_cancel(p1);
 	pthread_cancel(p2);
 	pthread_cancel(p3);
+	nprint("                                                                         \n", OR_BG, OR_BG, 28, 2);
+	nprint("YOU WON THE WHOLE GAME\n", OR_BG, OR_BG, 28, 2);
+	sleep(2000);
 
+	/*LEVEL 2
+	times = 0;
+	i=0;
+	fwin=0;
+	op=0;
+	while(i<2){
+		nprint("                                             \n", OR_BG, CYAN_BG, 28, 2);
+		nprint("LEVEL 2\n", OR_BG, CYAN_BG, 28, 2);
+		imageMoveTo(iBear, 11, 11);
+		imageMoveTo(im1, 15, 22);
+		imageMoveTo(im2, 18, 40);
+		imageMoveTo(im3, 14, 15);
+		printPlace(place);
+		imagePrint(iBear);
+		imagePrint(im1);
+		imagePrint(im2);
+		imagePrint(im3);
+
+		pthread_create(&p1,NULL,thread_function_move_recta1, im1);
+		pthread_create(&p2,NULL,thread_function_move_recta2, im2);
+		pthread_create(&p3,NULL,thread_function_move_cuadrado1, im3);
+		while(times < 200){
+
+			dir = _read_key();
+			imageMove(iBear, dir.x, dir.y);
+			times++;
+			
+			near1 = imagesNear(im1, iBear);
+			near2 = imagesNear(im2, iBear);
+			near3 = imagesNear(im3, iBear);
+			_move_cursor_to(29, 2);
+			printf("%d, %d", getImageY(iBear),getImageX(iBear));
+		
+			
+			if ((near1==2)||(near2==2)||(near3==2)){
+				pthread_cancel(p1);
+				pthread_cancel(p2);
+				pthread_cancel(p3);
+				printPlace(place);
+				nprint("                                             \n", OR_BG, CYAN_BG, 28, 2);
+				nprint("OOH YOU HAVE LOST\n", OR_BG, CYAN_BG, 28, 2);
+				sleep(2000);
+				break;
+			
+			}
+			else if ((getImageY(iBear)==26) && (getImageX(iBear)==52)){
+				pthread_cancel(p1);
+				pthread_cancel(p2);
+				pthread_cancel(p3);
+				printPlace(place);
+				nprint("                                             \n", OR_BG, CYAN_BG, 28, 2);
+				nprint("CONGRATS! YOU WON\n", OR_BG, CYAN_BG, 28, 2);
+				sleep(2000);
+				fwin=1;
+				break;
+			}
+
+		}
+		if (fwin==1) break;		
+		printPlace(place);
+		if (i<1) {
+			nprint("                                             \n", OR_BG, CYAN_BG, 28, 2);
+			nprint("DONT WORRY, YOU CAN TRY AGAIN\n", OR_BG, CYAN_BG, 28, 2);
+			sleep(2000);
+			}		
+		if (i==1) op=1;
+		i++;
+	}
+	_move_cursor_to(0, 0);
+	if (op=1) {
+		nprint("                                             \n", OR_BG, CYAN_BG, 28, 2);
+		nprint("YOU DONT HAVE MORE OPORTUNITIES, LETS GO TO THE NEXT LEVEL\n", OR_BG, CYAN_BG, 28, 2);
+		}
+		*/
+	pthread_cancel(p1);
+	pthread_cancel(p2);
+	pthread_cancel(p3);
+	printPlace(place);
+	
 	freeImage(iBear);
 	freeImage(im1);
 	freeImage(im2);
@@ -293,4 +443,5 @@ void main(){
 	freePlace(place);
 	_term_reset();
 	return;
+	
 }
