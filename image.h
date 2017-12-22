@@ -16,12 +16,13 @@ typedef struct _Image Image;
 Image *createImage(char *src, int r, int c, int bgColor, int fgColor, Place *place);
 void freeImage(Image *img);
 
-Status imageChangePosition(Image *img, int lat, int lng);
+Status imageChangePosition(Image *img, int x, int y);
 void imageChangeColor(Image *img, int bgColor, int fgColor);
-Status imageMoveTo(Image *img, int lat, int lng);
-Status imageMove(Image *img, int lat, int lng);
-Status imageSmoothMoveTo(Image *img, int lat, int lng, int time);
-Status imageSmoothMove(Image *img, int lat, int lng);
+Status imageMoveTo(Image *img, int x, int y);
+Status imageMove(Image *img, int x, int y);
+/*If wait==TRUE, it waits for the thread to stop*/ 
+Status imageSmoothMoveTo(Image *img, int x, int y, int time, Bool wait);
+Status imageSmoothMove(Image *img, int x, int y);
 
 Position imagesNear(Image *img1, Image *img2);
 int getImageX(Image *img);

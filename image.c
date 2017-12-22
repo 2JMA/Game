@@ -22,6 +22,8 @@ struct _Image{
 	Place *place;
 };
 
+pthread_mutex_t mutex;
+
 
 Image *createImage(char *fileName, int r, int c, int bgColor, int fgColor, Place *place){
 	Image *img;
@@ -107,18 +109,22 @@ Status imageChangePosition(Image *img, int x, int y){
 /*Move the image to an exact position*/
 Status imageMoveTo(Image *img, int x, int y){
 	Status result;
+	pthread_mutex_lock(&mutex);
 	imageClear(img);
 	result = imageChangePosition(img, x, y);
 	imagePrint(img);
+	pthread_mutex_unlock(&mutex);
 	return result;
 }
 
 /*Move the image by incrementing its position*/
 Status imageMove(Image *img, int x, int y){
 	Status result;
+	pthread_mutex_lock(&mutex);
 	imageClear(img);
 	result = imageChangePosition(img, img->iColumn + x, img->iRow + y);
 	imagePrint(img);
+	pthread_mutex_unlock(&mutex);
 	return result;
 }
 
@@ -130,7 +136,7 @@ struct thread_args{
 };
 
 /*Auxiliar function to move the image slowly to an exact position*/
-void *imageSmoothMoveToAux(void *arguments){
+void *imageSmoothMoveToAux_thread(void *arguments){
 	int i, j;
 	Status result;
 	struct thread_args *args;
@@ -176,20 +182,65 @@ void *imageSmoothMoveToAux(void *arguments){
 	}
 }
 
-/*Move the image slowly to an exact position*/
-Status imageSmoothMoveTo(Image *img, int x, int y, int time){
-	pthread_t p;
+Status imageSmoothMoveToAux(Image *img, int x, int y, int time){
+	int i, j;
 	Status result;
-	struct thread_args *args;
-	args = (struct thread_args *) malloc(sizeof(struct thread_args));
-	args->img = img;
-	args->x = x;
-	args->y = y;
-	args->time = time;
-	args->result = OK;
 
-	pthread_create(&p, NULL, imageSmoothMoveToAux, (void *)args);
-	pthread_join(p, NULL);
+	if(img->iColumn == y){
+		//printf("Caso 1\n");
+		/*We need the number of positions and the sign of the slide*/
+		int diff = x - img->iRow;
+		int s = diff/abs(diff);
+		diff = abs(diff);
+		for(i=0; i<diff; i + s){
+			result = imageMove(img, 0, s);
+			if(result != OK){
+				//printf("ERROR: %d\n", result);
+				return result;
+			}
+			sleep(time);
+		}
+		return OK;
+	}else if(img->iRow == x){
+		//printf("Caso 2\n");
+		int diff = y - img->iColumn;
+		int s = diff/abs(diff);
+		diff = abs(diff);
+		for(i=0; i<diff; i + s){
+			result = imageMove(img, s, 0);
+			if(result != OK){
+				//printf("ERROR: %d\n", result);
+				return result;
+			}
+			sleep(time);
+		}
+		return OK;
+	}else{
+		//printf("Caso 3\n");
+
+	}
+}
+
+/*Move the image slowly to an exact position*/
+Status imageSmoothMoveTo(Image *img, int x, int y, int time, Bool wait){
+	pthread_t p;
+	Status result = -1;
+	struct thread_args *args = NULL;
+	
+	if(wait == TRUE){
+		result = imageSmoothMoveToAux(img, x, y, time);
+	}else{
+		pthread_create(&p, NULL, imageSmoothMoveToAux_thread, (void *)args);
+		args = (struct thread_args *) malloc(sizeof(struct thread_args));
+		args->img = img;
+		args->x = x;
+		args->y = y;
+		args->time = time;
+		args->result = OK;
+	}
+	if(args != NULL)
+		free(args);
+
 	return result;
 }
 
@@ -290,7 +341,7 @@ Position imagesNearAux(Image *img1, Image *img2){
 /*Return TRUE just if the two images are strictly next to each other*/
 Position imagesNear(Image *img1, Image *img2){
 	int c1x, c2x, c1y, c2y;
-	if(img1 ==  NULL || img2 == NULL) return FAR;
+	if(img1 ==  NULL || img2 == NULL) return -1;
 
 	c1x = img1->iColumn + img1->nColumns/2;
 	c2x = img2->iColumn + img2->nColumns/2;

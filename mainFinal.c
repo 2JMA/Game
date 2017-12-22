@@ -30,6 +30,7 @@
 #define BLACK_FG 30
 
 struct termios initial;
+int liveEvil = 6; 
 
 /*
   Initializes the terminal in such a way that we can read the input
@@ -86,7 +87,11 @@ void *thread_read_key(void *direction) {
 
  	while(1){
  		choice = fgetc(stdin);
- 		if (choice == 27 && fgetc(stdin) == '[') { /* The key is an arrow key */
+
+		if(choice == ' '){
+ 	  		//Shot
+ 	  		dir->x = 2;
+ 	  	}else if (choice == 27 && fgetc(stdin) == '[') { /* The key is an arrow key */
  		    choice = fgetc(stdin);
  	
  		    switch(choice) {
@@ -106,8 +111,44 @@ void *thread_read_key(void *direction) {
  	  	}
  	
  	 	choice = 0;
- 	 	sleep(100);
  	}
+}
+
+location _read_key() {
+	char choice;
+  	location dir;
+ 	choice = fgetc(stdin);
+
+	dir.x = 0;
+ 	dir.y = 0;
+
+	if (choice == 27 && fgetc(stdin) == '[') { /* The key is an arrow key */
+	    choice = fgetc(stdin);
+
+	    switch(choice) {
+		    case('A'):
+		  	    dir.y = -1;
+		   		break;
+		    case('B'):
+		      	dir.y = 1;
+		      	break;
+		    case('C'):
+		      	dir.x = 1;
+		      	break;
+		    case('D'):
+		      	dir.x = -1;
+		      	break;
+	    }
+  	}else if(choice == ' '){
+ 	  	//Shot
+ 	  	dir.x = 2;
+ 	  	dir.y = 0;
+ 	}else{
+ 		dir.x = 0;
+ 	  	dir.y = 0;
+ 	}
+
+ 	return dir;   
 }
 
 void* thread_imagesNear(void *arguments){
@@ -128,47 +169,111 @@ void* thread_imagesNear(void *arguments){
 	}
 }
 
+void *thread_evil_move(void *image){
+	Image *img;
+	if(image == NULL) return NULL;
+	img = (Image *)image;
+	int move = 10;
+	while(1){
+		imageSmoothMoveTo(img, getImageY(img), getImageX(img)+move, 100, TRUE);
+		move = -1*move;
+	}
+}
+
+void *thread_shoot(void *arguments){
+	Status result;
+	Position p;
+	thread_shoot_args *args;
+	Image *bullet;
+	int i, j;
+
+	if(arguments == NULL) return NULL;
+	args = (thread_shoot_args *)arguments;
+	bullet = createImage("Images/bullet.txt", getImageY(args->shooter)+args->move, getImageX(args->shooter) , OR_BG, YELLOW_FG, args->place);
+	imagePrint(bullet);
+
+	for(i = getImageY(bullet); i > getImageY(bullet)-50; i--){
+		result = imageMove(bullet, 0, args->move);
+		if(result != OK){
+			imageClear(bullet);
+			freeImage(bullet);
+			pthread_exit(NULL);
+		}
+
+		p = imagesNear(bullet, (Image *)args->evil);
+		if(p == INSIDE || p == NEAR){
+			//Quitar vida al personaje y comprobar si esta muerto o no
+			liveEvil--;
+			imageClear(bullet);
+			freeImage(bullet);
+			pthread_exit(NULL);
+		}
+		sleep(100);
+	}
+
+	imageClear(bullet);
+	freeImage(bullet);
+	pthread_exit(NULL);
+}
+
+void *thread_program_running(){
+	while(1){
+		if(liveEvil == 0){
+			printf("HAS GANADO!!!\n");
+			exit(0);
+		}
+		sleep(500);
+	}
+}
+
 void main(){
 	int MAX_X, MAX_Y;
 	char line[MAX_LINE];
-	pthread_t read_keys, near_thread;
+	pthread_t read_keys, near_thread, evil_thread, shoot_thread, running_thread;
 	location dir;
 	thread_near_args args;
+	thread_shoot_args shootArgs;
 
 	_term_init();
 	_init_screen();
 
-	Place *place = createPlace(1, 1, "Maps/square1.txt", OR_BG, YELLOW_FG, '#', '.');
-	Image *iBear = createImage("Images/bear.txt", 12, 20 , OR_BG, RED_FG, place);
-	Image *evil = createImage("Images/emoji2.txt", 23, 25 , OR_BG, CYAN_FG, place);
-	Image *bullet1 = createImage("Images/bullet.txt", 21, 22 , OR_BG, YELLOW_FG, place);
-	Image *bullet2 = createImage("Images/bullet.txt", 10, 4 , OR_BG, YELLOW_FG, place);
-
+	Place *place = createPlace(1, 1, "Maps/square1.txt", OR_BG, YELLOW_FG, '#', ' ');
+	Image *iBear = createImage("Images/bear.txt", 40, 20 , OR_BG, RED_FG, place);
+	Image *evil = createImage("Images/boo.txt", 3, 20 , OR_BG, CYAN_FG, place);
 
 	printPlace(place);
 	imagePrint(iBear);
 	imagePrint(evil);
-	imagePrint(bullet1);
-	imagePrint(bullet2);
-	//imageSmoothMoveTo(bullet1, 0, 22, 50);
 
-	Image *imgs[] = {iBear, evil, bullet1, bullet2};
+	Image *imgs[] = {iBear, evil};
 	args.img = imgs;
-	args.numImg = 4;
+	args.numImg = 2;
 	args.pos = 0;
 
 	int times = 0;
 	dir.x = 0;
 	dir.y = 0;
 
-	pthread_create(&read_keys, NULL, thread_read_key, &dir);
-	pthread_create(&near_thread, NULL, thread_imagesNear, &args);
-	while(args.pos == 0){
+	shootArgs.shooter = iBear;
+	shootArgs.place = place;
+	/*TODO Reservar memoria bien*/
+	shootArgs.evil = evil;
+	shootArgs.move = -1;
 
-		if(dir.x !=0 || dir.y != 0){
+
+	//pthread_create(&read_keys, NULL, thread_read_key, &dir);
+	pthread_create(&running_thread, NULL, thread_program_running, NULL);
+	//pthread_create(&near_thread, NULL, thread_imagesNear, &args);
+	pthread_create(&evil_thread, NULL, thread_evil_move, evil);
+
+	while(args.pos == 0 && times < 200 ){
+		dir = _read_key();
+		if(dir.x == 2){
+			pthread_create(&shoot_thread, NULL, thread_shoot, &shootArgs);
+			dir.x = 0;
+			dir.y = 0;
+		}else if(dir.x !=0 || dir.y != 0){
 			imageMove(iBear, dir.x, dir.y);
-			imagePrint(bullet1);
-			imagePrint(bullet2);
 			imagePrint(evil);
 			dir.x = 0;
 			dir.y = 0;
@@ -176,14 +281,9 @@ void main(){
 		}
 	}
 
-	printf("Acabado\n");
-
-	pthread_cancel(read_keys);
-	//pthread_cancel(near_thread);
+	//pthread_cancel(read_keys);
 	freeImage(iBear);
-	freeImage(evil);
-	freeImage(bullet1);
-	freeImage(bullet2);
+	freeImage(evil);;
 	freePlace(place);
 	_term_reset();
 	return;

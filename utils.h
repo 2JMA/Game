@@ -11,6 +11,16 @@ typedef struct thread_near_args{
     int pos;
 }thread_near_args;
 
+typedef struct thread_shoot_args{
+	Place *place;
+    Image *shooter;
+    Image *evil;
+    int move;
+    /*At the moment, move is just -1 it the bullet goes up
+     or +1 if it goes down*/
+}thread_shoot_args;
+
+
 char *fileToStr(char *file);
 
 /*Stops the program x miliseconds*/
