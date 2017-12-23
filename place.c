@@ -111,6 +111,9 @@ void printPlace(Place *place){
 		for(i=0; i < place->nColumns; i++){
 			if(place->matrix[j][i] == OC_CHAR)
 				printf("%c", place->wall);
+			else if (place->matrix[j][i] == DOOR_CHAR)
+				printf("%c", place->bg);
+				/*The doors have no especial character atm*/
 			else
 				printf("%c", place->bg);
 		}
@@ -144,7 +147,9 @@ Status setUpPlace(Place *p, char *data){
 		if(*c != '\n'){
 			if(j >= p->nRows || i >= p->nColumns) return ERROR;
 
-			if(*c != ' ' && *c != '\0'){
+			if(*c == '#'){
+				p->matrix[j][i] = DOOR_CHAR;
+			}else if(*c != ' ' && *c != '\0'){
 				p->matrix[j][i] = OC_CHAR;
 			}else{
 				p->matrix[j][i] = 0;
@@ -159,12 +164,12 @@ Status setUpPlace(Place *p, char *data){
 }
 
 /*Return true if the place available between xi-xf and yi-yf is free*/
-Status placeAvailable(Place *p, int xi, int xf, int yi, int yf){
+PlaceAvailable placeAvailable(Place *p, int xi, int xf, int yi, int yf){
 	if(p == NULL) return ERROR;
 	int i, j;
 
-	if(xi < p->iColumn || yi < p->iRow) return -1;
-	if(xf > p->nColumns + p->iColumn || yf > p->nRows + p->iRow) return -2;
+	if(xi < p->iColumn || yi < p->iRow) return ERROR;
+	if(xf > p->nColumns + p->iColumn || yf > p->nRows + p->iRow) return ERROR;
 
  	/*Change the baricentric reference of the object.*/
  	xi -=  p->iColumn;
@@ -175,11 +180,13 @@ Status placeAvailable(Place *p, int xi, int xf, int yi, int yf){
 	for(i=yi; i<yf; i++){
 		for(j=xi; j<xf; j++){
 			if(p->matrix[i][j] == OC_CHAR)
-				return -3;
+				return OCCUPIED;
+			else if(p->matrix[i][j] == DOOR_CHAR)
+				return DOOR;
 		}
 	}
 
-	return OK;
+	return AVAILABLE;
 }
 
 char placeGetWall(Place *p){

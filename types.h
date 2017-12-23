@@ -4,6 +4,7 @@
 #define NUM_COLS 139
 #define NUM_ROWS 52
 #define OC_CHAR 1
+#define DOOR_CHAR 2
 /*
 Number of rows and columns of the terminal
 Using tput cols and tput lines on the terminal*/
@@ -13,7 +14,7 @@ Using tput cols and tput lines on the terminal*/
 #define X_ELSE 666
 
 typedef enum {
- ERROR = 0, OK = 1
+ ERROR = -1, OK = 1
 } Status;
 
 typedef enum {
@@ -23,6 +24,11 @@ typedef enum {
 typedef enum {
  FAR = 0, NEAR = 1, INSIDE = 2
 } Position;
+
+typedef enum {
+ OCCUPIED = 0, AVAILABLE = 1, DOOR = 2
+} PlaceAvailable;
+
 
 typedef struct Location{
 	int x;

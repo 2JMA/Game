@@ -128,19 +128,20 @@ void main(){
 	imagePrint(iCute);
 
 	location dir;
+	PlaceAvailable result;
 	Position near1;
 	int times = 0;
 	while(times < 200){
 
 		dir = _read_key();
-		imageMove(iBear, dir.x, dir.y);
+		result = imageMove(iBear, dir.x, dir.y);
 		times++;
 		/*
 		printImageData(iBear);
-		*/
+		
 		near1 = imagesNear(iCute, iBear);
 		_move_cursor_to(0, 0);
-		printf("%d", near1);
+		printf("%d", result);*/
 	}
 
 	freeImage(iBear);

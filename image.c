@@ -88,27 +88,27 @@ void imageChangeColor(Image *img, int bgColor, int fgColor){
 }
 
 /*Change the image coordinates*/
-Status imageChangePosition(Image *img, int x, int y){
-	Status result;
+PlaceAvailable imageChangePosition(Image *img, int x, int y){
+	PlaceAvailable result;
 	if(img == NULL) return ERROR;
 	if(x <= 0 || y <= 0) return ERROR;
 	if(x + img->nColumns -1 > NUM_COLS) return ERROR;
 	if(y + img->nRows -1 > NUM_ROWS) return ERROR;
 
 	result = placeAvailable(img->place, x, x + img->nColumns, y, y + img->nRows);
-	if(result != OK){
+	if(result == OCCUPIED){
 		return result;
 	}
 
 	img->iColumn = x;
 	img->iRow = y;
-	return OK;
+	return result;
 }
 
 
 /*Move the image to an exact position*/
-Status imageMoveTo(Image *img, int x, int y){
-	Status result;
+PlaceAvailable imageMoveTo(Image *img, int x, int y){
+	PlaceAvailable result;
 	pthread_mutex_lock(&mutex);
 	imageClear(img);
 	result = imageChangePosition(img, x, y);
@@ -118,8 +118,8 @@ Status imageMoveTo(Image *img, int x, int y){
 }
 
 /*Move the image by incrementing its position*/
-Status imageMove(Image *img, int x, int y){
-	Status result;
+PlaceAvailable imageMove(Image *img, int x, int y){
+	PlaceAvailable result;
 	pthread_mutex_lock(&mutex);
 	imageClear(img);
 	result = imageChangePosition(img, img->iColumn + x, img->iRow + y);
@@ -132,13 +132,13 @@ Status imageMove(Image *img, int x, int y){
 struct thread_args{
     Image *img;
     int x, y, time;
-    Status result;
+    PlaceAvailable result;
 };
 
 /*Auxiliar function to move the image slowly to an exact position*/
 void *imageSmoothMoveToAux_thread(void *arguments){
 	int i, j;
-	Status result;
+	PlaceAvailable result;
 	struct thread_args *args;
 	if(arguments == NULL) return ERROR;
 	args = (struct thread_args *)arguments;
@@ -151,14 +151,14 @@ void *imageSmoothMoveToAux_thread(void *arguments){
 		diff = abs(diff);
 		for(i=0; i<diff; i + s){
 			result = imageMove(args->img, 0, s);
-			if(result != OK){
+			if(result != AVAILABLE){
 				/*printf("ERROR: %d\n", result);*/
 				args->result = result;
 				pthread_exit(NULL);
 			}
 			sleep(args->time);
 		}
-		args->result = OK;
+		args->result = AVAILABLE;
 		pthread_exit(NULL);
 	}else if(args->img->iRow == args->x){
 		/*printf("Caso 2\n");*/
@@ -167,14 +167,14 @@ void *imageSmoothMoveToAux_thread(void *arguments){
 		diff = abs(diff);
 		for(i=0; i<diff; i + s){
 			result = imageMove(args->img, s, 0);
-			if(result != OK){
+			if(result != AVAILABLE){
 				/*printf("ERROR: %d\n", result);*/
 				args->result = result;
 				pthread_exit(NULL);
 			}
 			sleep(args->time);
 		}
-		args->result = OK;
+		args->result = AVAILABLE;
 		pthread_exit(NULL);
 	}else{
 		/*printf("Caso 3\n");*/
@@ -182,9 +182,9 @@ void *imageSmoothMoveToAux_thread(void *arguments){
 	}
 }
 
-Status imageSmoothMoveToAux(Image *img, int x, int y, int time){
+PlaceAvailable imageSmoothMoveToAux(Image *img, int x, int y, int time){
 	int i, j;
-	Status result;
+	PlaceAvailable result;
 
 	if(img->iColumn == y){
 		/*printf("Caso 1\n");*/
@@ -194,13 +194,13 @@ Status imageSmoothMoveToAux(Image *img, int x, int y, int time){
 		diff = abs(diff);
 		for(i=0; i<diff; i + s){
 			result = imageMove(img, 0, s);
-			if(result != OK){
+			if(result != AVAILABLE){
 				/*printf("ERROR: %d\n", result);*/
 				return result;
 			}
 			sleep(time);
 		}
-		return OK;
+		return AVAILABLE;
 	}else if(img->iRow == x){
 		/*printf("Caso 2\n");*/
 		int diff = y - img->iColumn;
@@ -208,13 +208,13 @@ Status imageSmoothMoveToAux(Image *img, int x, int y, int time){
 		diff = abs(diff);
 		for(i=0; i<diff; i + s){
 			result = imageMove(img, s, 0);
-			if(result != OK){
+			if(result != AVAILABLE){
 				/*printf("ERROR: %d\n", result);*/
 				return result;
 			}
 			sleep(time);
 		}
-		return OK;
+		return AVAILABLE;
 	}else{
 		/*printf("Caso 3\n");*/
 
@@ -222,9 +222,9 @@ Status imageSmoothMoveToAux(Image *img, int x, int y, int time){
 }
 
 /*Move the image slowly to an exact position*/
-Status imageSmoothMoveTo(Image *img, int x, int y, int time, Bool wait){
+PlaceAvailable imageSmoothMoveTo(Image *img, int x, int y, int time, Bool wait){
 	pthread_t p;
-	Status result = -1;
+	PlaceAvailable result = ERROR;
 	struct thread_args *args = NULL;
 
 	if(wait == TRUE){
@@ -245,7 +245,7 @@ Status imageSmoothMoveTo(Image *img, int x, int y, int time, Bool wait){
 }
 
 /*Move the image slowly by incrementing its position*/
-Status imageSmoothMove(Image *img, int x, int y){
+PlaceAvailable imageSmoothMove(Image *img, int x, int y){
 
 }
 
