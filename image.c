@@ -11,7 +11,7 @@
 
 /*Element to be printed an cleared.
 It is the main graphical element of the game.
-in order to move it, you have to clear it, change iRow, iColumn, 
+in order to move it, you have to clear it, change iRow, iColumn,
 and print it again
 */
 struct _Image{
@@ -43,7 +43,7 @@ Image *createImage(char *fileName, int r, int c, int bgColor, int fgColor, Place
 	img->place = place;
 	img->src = src;
 
-	//Get the number of rows and columns of the str, as if it was a matrix
+	/*Get the number of rows and columns of the str, as if it was a matrix*/
 	int temp;
 	for(p=src, img->nColumns=1, img->nRows=1, temp=1; *p!='\0'; p++){
 		/*I don't know how it wors, it is from stackoverflow*/
@@ -52,16 +52,16 @@ Image *createImage(char *fileName, int r, int c, int bgColor, int fgColor, Place
 		if(*p=='\n'){
 			img->nRows += 1;
 			if(temp > img->nColumns){
-				//We don't want to count the \n
+				/*We don't want to count the \n*/
 				img->nColumns=temp-1;
 			}
 			temp=1;
 		}
 	}
 
-	//Because the last char mey be a \0, not \n
+	/*Because the last char mey be a \0, not \n*/
 	if(temp > img->nColumns){
-		//We don't want to count the \n
+		/*We don't want to count the \n*/
 		img->nColumns=temp-1;
 	}
 
@@ -130,7 +130,7 @@ Status imageMove(Image *img, int x, int y){
 
 /*Aux strunct to pass the arguments*/
 struct thread_args{
-    Image *img; 
+    Image *img;
     int x, y, time;
     Status result;
 };
@@ -144,7 +144,7 @@ void *imageSmoothMoveToAux_thread(void *arguments){
 	args = (struct thread_args *)arguments;
 
 	if(args->img->iColumn == args->y){
-		//printf("Caso 1\n");
+		/*printf("Caso 1\n");*/
 		/*We need the number of positions and the sign of the slide*/
 		int diff = args->x - args->img->iRow;
 		int s = diff/abs(diff);
@@ -152,7 +152,7 @@ void *imageSmoothMoveToAux_thread(void *arguments){
 		for(i=0; i<diff; i + s){
 			result = imageMove(args->img, 0, s);
 			if(result != OK){
-				//printf("ERROR: %d\n", result);
+				/*printf("ERROR: %d\n", result);*/
 				args->result = result;
 				pthread_exit(NULL);
 			}
@@ -161,14 +161,14 @@ void *imageSmoothMoveToAux_thread(void *arguments){
 		args->result = OK;
 		pthread_exit(NULL);
 	}else if(args->img->iRow == args->x){
-		//printf("Caso 2\n");
+		/*printf("Caso 2\n");*/
 		int diff = args->y - args->img->iColumn;
 		int s = diff/abs(diff);
 		diff = abs(diff);
 		for(i=0; i<diff; i + s){
 			result = imageMove(args->img, s, 0);
 			if(result != OK){
-				//printf("ERROR: %d\n", result);
+				/*printf("ERROR: %d\n", result);*/
 				args->result = result;
 				pthread_exit(NULL);
 			}
@@ -177,7 +177,7 @@ void *imageSmoothMoveToAux_thread(void *arguments){
 		args->result = OK;
 		pthread_exit(NULL);
 	}else{
-		//printf("Caso 3\n");
+		/*printf("Caso 3\n");*/
 
 	}
 }
@@ -187,7 +187,7 @@ Status imageSmoothMoveToAux(Image *img, int x, int y, int time){
 	Status result;
 
 	if(img->iColumn == y){
-		//printf("Caso 1\n");
+		/*printf("Caso 1\n");*/
 		/*We need the number of positions and the sign of the slide*/
 		int diff = x - img->iRow;
 		int s = diff/abs(diff);
@@ -195,28 +195,28 @@ Status imageSmoothMoveToAux(Image *img, int x, int y, int time){
 		for(i=0; i<diff; i + s){
 			result = imageMove(img, 0, s);
 			if(result != OK){
-				//printf("ERROR: %d\n", result);
+				/*printf("ERROR: %d\n", result);*/
 				return result;
 			}
 			sleep(time);
 		}
 		return OK;
 	}else if(img->iRow == x){
-		//printf("Caso 2\n");
+		/*printf("Caso 2\n");*/
 		int diff = y - img->iColumn;
 		int s = diff/abs(diff);
 		diff = abs(diff);
 		for(i=0; i<diff; i + s){
 			result = imageMove(img, s, 0);
 			if(result != OK){
-				//printf("ERROR: %d\n", result);
+				/*printf("ERROR: %d\n", result);*/
 				return result;
 			}
 			sleep(time);
 		}
 		return OK;
 	}else{
-		//printf("Caso 3\n");
+		/*printf("Caso 3\n");*/
 
 	}
 }
@@ -226,7 +226,7 @@ Status imageSmoothMoveTo(Image *img, int x, int y, int time, Bool wait){
 	pthread_t p;
 	Status result = -1;
 	struct thread_args *args = NULL;
-	
+
 	if(wait == TRUE){
 		result = imageSmoothMoveToAux(img, x, y, time);
 	}else{
@@ -246,7 +246,7 @@ Status imageSmoothMoveTo(Image *img, int x, int y, int time, Bool wait){
 
 /*Move the image slowly by incrementing its position*/
 Status imageSmoothMove(Image *img, int x, int y){
-	
+
 }
 
 /*Auxiliar image to detect wether to images are really near or not
@@ -291,7 +291,7 @@ Position imagesNearAux(Image *img1, Image *img2){
 	matrix = (short **)malloc(sizeof(short*)*(yMax - yMin + 3));
 	if(matrix == NULL){
 		return FAR;
-	} 
+	}
 
 	for(i=0; i<(yMax - yMin + 3); i++){
 		matrix[i] = (short*)calloc((xMax - xMin + 3),sizeof(short));
@@ -394,7 +394,7 @@ int imagePrint(Image *img){
 
     _prepare_font(img->bgColor, img->fgColor);
     _move_cursor_to(img->iRow, img->iColumn);
-    
+
     i=0;
     n=0;
     nRows = 0;
@@ -408,7 +408,7 @@ int imagePrint(Image *img){
     	}
     	i++;
     }
-    
+
     fflush(stdout);
     _prepare_font(OR_BG, OR_FG);
     return n;
@@ -422,7 +422,7 @@ void imageClear(Image *img){
     _prepare_font(placeGetBgColor(img->place), placeGetFgColor(img->place));
     _move_cursor_to(img->iRow, img->iColumn);
     bg = placeGetBg(img->place);
-    
+
     for(i=0; i < img->nRows ; i++){
     	_move_cursor_to(img->iRow + i, img->iColumn);
    		for(j=0; j< img->nColumns; j++) {
@@ -449,7 +449,7 @@ void imageClear2(Image *img){
     _prepare_font(OR_BG, OR_FG);
     _move_cursor_to(img->iRow, img->iColumn);
 
-    //Clear all the spaces of the image
+    /*Clear all the spaces of the image*/
     for(i=0; i< img->nRows; i++){
     	for(j=0; j< img->nColumns; j++){
     		printf(" ");

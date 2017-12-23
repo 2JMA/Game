@@ -10,7 +10,7 @@
 #include "image.h"
 #include "utils.h"
 
-//From nprint
+/*From nprint*/
 #define OR_BG 40
 #define OR_FG 37
 
@@ -89,7 +89,7 @@ void *thread_read_key(void *direction) {
  		choice = fgetc(stdin);
 
 		if(choice == ' '){
- 	  		//Shot
+ 	  		/*Shot*/
  	  		dir->x = 2;
  	  	}else if (choice == 27 && fgetc(stdin) == '[') { /* The key is an arrow key */
  		    choice = fgetc(stdin);
@@ -140,7 +140,7 @@ location _read_key() {
 		      	break;
 	    }
   	}else if(choice == ' '){
- 	  	//Shot
+ 	  	/*Shot*/
  	  	dir.x = 2;
  	  	dir.y = 0;
  	}else{
@@ -202,7 +202,7 @@ void *thread_shoot(void *arguments){
 
 		p = imagesNear(bullet, (Image *)args->evil);
 		if(p == INSIDE || p == NEAR){
-			//Quitar vida al personaje y comprobar si esta muerto o no
+			/*Quitar vida al personaje y comprobar si esta muerto o no*/
 			liveEvil--;
 			imageClear(bullet);
 			freeImage(bullet);
@@ -261,9 +261,9 @@ void main(){
 	shootArgs.move = -1;
 
 
-	//pthread_create(&read_keys, NULL, thread_read_key, &dir);
+	/*pthread_create(&read_keys, NULL, thread_read_key, &dir);*/
 	pthread_create(&running_thread, NULL, thread_program_running, NULL);
-	//pthread_create(&near_thread, NULL, thread_imagesNear, &args);
+	/*pthread_create(&near_thread, NULL, thread_imagesNear, &args);*/
 	pthread_create(&evil_thread, NULL, thread_evil_move, evil);
 
 	while(args.pos == 0 && times < 200 ){
@@ -281,7 +281,7 @@ void main(){
 		}
 	}
 
-	//pthread_cancel(read_keys);
+	/*pthread_cancel(read_keys);*/
 	freeImage(iBear);
 	freeImage(evil);;
 	freePlace(place);

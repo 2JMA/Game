@@ -13,7 +13,7 @@
 
 /*Element to be printed an cleared.
 It is the main graphical element of the game.
-in order to move it, you have to clear it, change iRow, iColumn, 
+in order to move it, you have to clear it, change iRow, iColumn,
 and print it again
 */
 struct _Place{
@@ -44,7 +44,7 @@ Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char 
 	place->iRow = r;
 
 
-	//Get the number of rows and columns of the map, as if it was a matrix
+	/*Get the number of rows and columns of the map, as if it was a matrix*/
 	for(p = map, place->nColumns = 0, place->nRows = 1, temp = 0; *p!='\0'; p++){
 		/*I don't know how it wors, it is from stackoverflow*/
 		if ((*p & 0xC0) != 0x80) ++temp;
@@ -52,16 +52,16 @@ Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char 
 		if(*p=='\n'){
 			place->nRows += 1;
 			if(temp > place->nColumns){
-				//We don't want to count the \n
+				/*We don't want to count the \n*/
 				place->nColumns = temp-1;
 			}
 			temp = 0;
 		}
 	}
 
-	//Because the last char mey be a \0, not \n
+	/*Because the last char mey be a \0, not \n*/
 	if(temp > place->nColumns){
-		//We don't want to count the \n
+		/*We don't want to count the \n*/
 		place->nColumns=temp-1;
 	}
 
@@ -73,7 +73,7 @@ Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char 
 		free(place);
 		free(map);
 		return NULL;
-	} 
+	}
 
 	for(i=0; i<place->nRows; i++){
 		/*Initialize all the map with zeros*/
@@ -115,7 +115,7 @@ void printPlace(Place *place){
 				printf("%c", place->bg);
 		}
 	}
-	
+
 	fflush(stdout);
     _prepare_font(OR_BG, OR_FG);
 }
@@ -165,7 +165,7 @@ Status placeAvailable(Place *p, int xi, int xf, int yi, int yf){
 
 	if(xi < p->iColumn || yi < p->iRow) return -1;
 	if(xf > p->nColumns + p->iColumn || yf > p->nRows + p->iRow) return -2;
- 	
+
  	/*Change the baricentric reference of the object.*/
  	xi -=  p->iColumn;
  	xf -=  p->iColumn;

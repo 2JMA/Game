@@ -109,21 +109,21 @@ int getType(resource *r){
 }
 
 int getMin(resource *r){
-	//TODO Set an error number
+	/*TODO Set an error number*/
 	if(r==NULL) return -1;
 
 	return r->min;
 }
 
 int getMax(resource *r){
-	//TODO Set an error number
+	/*TODO Set an error number*/
 	if(r==NULL) return -1;
 
 	return r->max;
 }
 
 int getValue(resource *r){
-	//TODO Set an error number
+	/*TODO Set an error number*/
 	if(r==NULL) return -1;
 
 	return r->value;

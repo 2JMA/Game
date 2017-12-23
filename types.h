@@ -8,6 +8,10 @@
 Number of rows and columns of the terminal
 Using tput cols and tput lines on the terminal*/
 
+
+#define Y_ELSE 666
+#define X_ELSE 666
+
 typedef enum {
  ERROR = 0, OK = 1
 } Status;
