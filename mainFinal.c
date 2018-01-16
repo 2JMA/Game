@@ -31,6 +31,8 @@
 
 struct termios initial;
 int liveEvil = 6; 
+/*Max time to win, in seconds*/
+double maxTime = 15;
 
 /*
   Initializes the terminal in such a way that we can read the input
@@ -175,7 +177,7 @@ void *thread_evil_move(void *image){
 	img = (Image *)image;
 	int move = 10;
 	while(liveEvil > 0){
-		imageSmoothMoveTo(img, getImageY(img), getImageX(img)+move, 100, TRUE);
+		imageSmoothMoveTo(img, getImageY(img), getImageX(img)+move, 60, TRUE);
 		move = -1*move;
 	}
 }
@@ -228,7 +230,13 @@ void *thread_program_running(void *p){
 			printInsidePlace(place, "Congratulations!\nYou have beaten the final evil, Marabini, and you should be proud of yourself, not too many people achive it, and this should be a long text in order to test the print funtion.", placeGetFgColor(place));
 			_move_cursor_to(placeGetLastRow(place)+1, 1);
 			exit(0);
+		}else if( maxTime <= 0){
+			printInsidePlace(place, "Sorry!\nYou weren't fast enought to beat final evil, Marabini, but don't worry, not too many people achive it.\nYou can try it again if you want", placeGetFgColor(place));
+			_move_cursor_to(placeGetLastRow(place)+1, 1);
+			exit(0);
 		}
+
+		maxTime-=0.5;
 		sleep(500);
 	}
 }
@@ -276,7 +284,7 @@ void main(){
 	/*pthread_create(&near_thread, NULL, thread_imagesNear, &args);*/
 	pthread_create(&evil_thread, NULL, thread_evil_move, evil);
 
-	while(args.pos == 0 && liveEvil > 0 ){
+	while(args.pos == 0){
 		dir = _read_key();
 		if(dir.x == 2){
 			pthread_create(&shoot_thread, NULL, thread_shoot, &shootArgs);
