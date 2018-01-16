@@ -1,8 +1,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#define NUM_COLS 139
-#define NUM_ROWS 52
+#define NUM_COLS 146
+#define NUM_ROWS 58
 #define OC_CHAR 1
 #define DOOR_CHAR 2
 /*
