@@ -125,8 +125,6 @@ void printPlace(Place *place){
 			else if (place->matrix[j][i] == DOOR_CHAR)
 				printf("%c", place->bg);
 				/*The doors have no especial character atm*/
-			else if (place->matrix[j][i] == NLINE_CHAR)
-				printf("%c", '!');
 			else
 				printf("%c", place->bg);
 		}
