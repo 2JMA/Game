@@ -4,6 +4,7 @@
 #include <memory.h>
 #include <string.h>
 #include <math.h>
+#include <pthread.h>
 #include "types.h"
 #include "nprint.h"
 #include "utils.h"
@@ -23,6 +24,8 @@ struct _Place{
 	int nColumns, nRows;
 	char wall, bg;
 };
+
+pthread_mutex_t mutex;
 
 Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char wall, char bg){
 	int i, j, temp;
@@ -115,6 +118,7 @@ void printPlace(Place *place){
 	int i, j;
 	if(place == NULL) return;
 
+	pthread_mutex_lock(&mutex);
 	_prepare_font(place->bgColor, place->fgColor);
 
 	for(j=0; j < place->nRows; j++){
@@ -132,6 +136,7 @@ void printPlace(Place *place){
 
 	fflush(stdout);
     _prepare_font(OR_BG, OR_FG);
+    pthread_mutex_unlock(&mutex);
 }
 
 int printInsidePlace(Place *place, char *text, int color){
@@ -147,6 +152,8 @@ int printInsidePlace(Place *place, char *text, int color){
 	if(place->iColumn <= 0){
 		iCol = 3;
 	}
+
+	pthread_mutex_lock(&mutex);
 	_move_cursor_to(place->iRow +2, iCol);
 	_prepare_font(place->bgColor, color);
 
@@ -177,6 +184,7 @@ int printInsidePlace(Place *place, char *text, int color){
 
 	fflush(stdout);
     _prepare_font(OR_BG, OR_FG);
+    pthread_mutex_unlock(&mutex);
     return n;
 }
 
