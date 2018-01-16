@@ -47,7 +47,7 @@ Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char 
 
 	/*Get the number of rows and columns of the map, as if it was a matrix*/
 	for(p = map, place->nColumns = 0, place->nRows = 1, temp = 0; *p!='\0'; p++){
-		/*I don't know how it wors, it is from stackoverflow*/
+		/*I don't know how it works, it is from stackoverflow*/
 		if ((*p & 0xC0) != 0x80) ++temp;
 
 		if(*p=='\n'){
@@ -57,10 +57,20 @@ Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char 
 				place->nColumns = temp-1;
 			}
 			temp = 0;
+		}else if(*p=='\r' && *(p+1)=='\n'){
+			/*Fix compatibility issues ith windows files*/
+			p++;
+			place->nRows += 1;
+			if(temp > place->nColumns){
+				/*We don't want to count the \n*/
+				place->nColumns = temp-1;
+			}
+			temp = 0;
 		}
+		
 	}
 
-	/*Because the last char mey be a \0, not \n*/
+	/*Because the last char may be a \0, not \n*/
 	if(temp > place->nColumns){
 		/*We don't want to count the \n*/
 		place->nColumns=temp-1;
@@ -115,6 +125,8 @@ void printPlace(Place *place){
 			else if (place->matrix[j][i] == DOOR_CHAR)
 				printf("%c", place->bg);
 				/*The doors have no especial character atm*/
+			else if (place->matrix[j][i] == NLINE_CHAR)
+				printf("%c", '!');
 			else
 				printf("%c", place->bg);
 		}
@@ -122,6 +134,52 @@ void printPlace(Place *place){
 
 	fflush(stdout);
     _prepare_font(OR_BG, OR_FG);
+}
+
+int printInsidePlace(Place *place, char *text, int color){
+	int n, iCol, i, j;
+	char *c;
+	if(place == NULL || text == NULL) return -1;
+	if(strlen(text) > (place->nRows-4)*(place->nColumns-4)) return -1;
+
+	/*First of all we clear the space*/
+	printPlace(place);
+
+	iCol = place->iColumn + 2;
+	if(place->iColumn <= 0){
+		iCol = 3;
+	}
+	_move_cursor_to(place->iRow +2, iCol);
+	_prepare_font(place->bgColor, color);
+
+	if(strlen(text) < place->nColumns-4){
+		/*The text fits in just one line*/
+		n = printf("%s", text);
+	}else{
+		for(c=text, i=0, j=0, n=0; *c != '\0'; c++, i++){
+			/*i is the number of column, j is the number of row*/
+			if(*c == '\n'){
+				i = 0;
+				j++;
+				_move_cursor_to(place->iRow +2+j, iCol);
+			}else if(i < place->nColumns-5){
+				n+=printf("%c", *c);
+			}else if(i == place->nColumns-5 && (*c!='\n' || *c!=' ')){
+				n+=printf("-");
+				i = 0;
+				j++;
+				_move_cursor_to(place->iRow +2+j, iCol);
+				n+=printf("%c", *c);
+			}else{
+				_move_cursor_to(place->iRow +2+j, iCol);
+				n+=printf("%c", *c);
+			}
+		}
+	}
+
+	fflush(stdout);
+    _prepare_font(OR_BG, OR_FG);
+    return n;
 }
 
 void freePlace(Place *p){
@@ -145,6 +203,8 @@ Status setUpPlace(Place *p, char *data){
 	if(p == NULL || data == NULL) return ERROR;
 
 	for(c = data, i=0, j=0; *c != '\0'; c++){
+		/*Ignore the \r and use just the \n*/
+		if(*c=='\r' && *(c+1)=='\n') continue;
 		if(*c != '\n'){
 			if(j >= p->nRows || i >= p->nColumns) return ERROR;
 
@@ -208,4 +268,24 @@ int placeGetBgColor(Place *p){
 int placeGetFgColor(Place *p){
 	if(p == NULL) return -1;
 	return p->fgColor;
+}
+
+int placeGetLastRow(Place *p){
+	if(p == NULL) return -1;
+	return p->iRow + p->nRows-1;
+}
+
+int placeGetLastColumn(Place *p){
+	if(p == NULL) return -1;
+	return p->iColumn + p->nColumns-1;
+}
+
+int placeGetFirstRow(Place *p){
+	if(p == NULL) return -1;
+	return p->iRow;
+}
+
+int placeGetFirstColumn(Place *p){
+	if(p == NULL) return -1;
+	return p->iColumn;
 }

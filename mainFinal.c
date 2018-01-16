@@ -174,7 +174,7 @@ void *thread_evil_move(void *image){
 	if(image == NULL) return NULL;
 	img = (Image *)image;
 	int move = 10;
-	while(1){
+	while(liveEvil > 0){
 		imageSmoothMoveTo(img, getImageY(img), getImageX(img)+move, 100, TRUE);
 		move = -1*move;
 	}
@@ -216,10 +216,17 @@ void *thread_shoot(void *arguments){
 	pthread_exit(NULL);
 }
 
-void *thread_program_running(){
+void *thread_program_running(void *p){
+	if(p == NULL){
+		printf("ES NULL\n");
+		exit(0);
+	} 
+	Place *place;
+	place = (Place *) p;
 	while(1){
 		if(liveEvil == 0){
-			printf("HAS GANADO!!!\n");
+			printInsidePlace(place, "Congratulations!\nYou have beaten the final evil, Marabini, and you should be proud of yourself, not too many people achive it, and this should be a long text in order to test the print funtion.", placeGetFgColor(place));
+			_move_cursor_to(placeGetLastRow(place)+1, 1);
 			exit(0);
 		}
 		sleep(500);
@@ -237,10 +244,14 @@ void main(){
 	_init_screen();
 
 	Place *place = createPlace(1, 1, "Maps/square1.txt", OR_BG, YELLOW_FG, '#', ' ');
+	Place *textRect = createPlace(placeGetLastRow(place)+1, placeGetFirstColumn(place), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
+	Place *infoRect = createPlace(placeGetFirstRow(place), placeGetLastColumn(place)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
 	Image *iBear = createImage("Images/bear.txt", 40, 20 , OR_BG, RED_FG, place);
 	Image *evil = createImage("Images/boo.txt", 3, 20 , OR_BG, CYAN_FG, place);
 
 	printPlace(place);
+	printPlace(textRect);
+	printPlace(infoRect);
 	imagePrint(iBear);
 	imagePrint(evil);
 
@@ -261,11 +272,11 @@ void main(){
 
 
 	/*pthread_create(&read_keys, NULL, thread_read_key, &dir);*/
-	pthread_create(&running_thread, NULL, thread_program_running, NULL);
+	pthread_create(&running_thread, NULL, thread_program_running, textRect);
 	/*pthread_create(&near_thread, NULL, thread_imagesNear, &args);*/
 	pthread_create(&evil_thread, NULL, thread_evil_move, evil);
 
-	while(args.pos == 0 && times < 200 ){
+	while(args.pos == 0 && liveEvil > 0 ){
 		dir = _read_key();
 		if(dir.x == 2){
 			pthread_create(&shoot_thread, NULL, thread_shoot, &shootArgs);

@@ -56,6 +56,16 @@ Image *createImage(char *fileName, int r, int c, int bgColor, int fgColor, Place
 				img->nColumns=temp-1;
 			}
 			temp=1;
+
+		}else if(*p=='\r' && *(p+1)=='\n'){
+			/*Fix compatibility issues ith windows files*/
+			p++;
+			img->nRows += 1;
+			if(temp > img->nColumns){
+				/*We don't want to count the \n*/
+				img->nColumns=temp-1;
+			}
+			temp=1;
 		}
 	}
 
