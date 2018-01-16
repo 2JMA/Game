@@ -19,9 +19,10 @@ struct _Character{
 };
 
 character* iniCharacter(char *name, Image *image, int type, object* obj, object* needs, char* info){
+	character* mChar;
 	if(name == NULL || image == NULL) return NULL;
 
-	character* mChar = (character*)malloc(sizeof(character));
+	mChar = (character*)malloc(sizeof(character));
 	if (mChar==NULL)
 		return NULL;
 	mChar->name =strdup(name);
@@ -154,10 +155,10 @@ character* charGetNextTo(character** chars){
 }
 
 Status charPrintInfo(character** chars){
-	if(chars==NULL) return ERROR;
-	int i;
 	character* mChar;
 	char* s;
+	if(chars==NULL) return ERROR;
+	
 	mChar=charGetNextTo(chars);
 	if(mChar==NULL){
 		nprint("No hay nadie al lado.\n", OR_BG, CYAN_BG, 1, 1);

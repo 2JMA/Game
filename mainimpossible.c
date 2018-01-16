@@ -111,8 +111,8 @@ location _read_key() {
 }
 
 void thread_function_move_recta1(Image* im){
-	if (im==NULL) return;
 	int i;
+	if (im==NULL) return;
 
 	while(1){
 		for(i=1; i<=30; i++){
@@ -128,8 +128,8 @@ void thread_function_move_recta1(Image* im){
 }
 
 void thread_function_move_recta2(Image* im){
-	if (im==NULL) return;
 	int i;
+	if (im==NULL) return;
 
 	while(1){
 		for(i=1; i<=30; i++){
@@ -145,8 +145,8 @@ void thread_function_move_recta2(Image* im){
 }
 
 void thread_function_move_cuadrado1(Image* im){
-	if (im==NULL) return;
 	int i;
+	if (im==NULL) return;
 
 	while(1){
 		for(i=1; i<=30; i++){

@@ -13,7 +13,6 @@ struct _Object{
 };
 
 object *iniObject(char* name, int type, Bool picked, Bool pickable, Image* image, int num_res, int* resources){
-
 	object *obj;
 	int i;
 
@@ -130,9 +129,9 @@ Status objectSetLocation(object* obj, int x, int y){
 }
 
 Status objectSetResources(object* obj, int* res, int num_res){
+	int i;
 	if((obj==NULL)||(obj->type==-1)) return ERROR;
 
-	int i;
 	if(obj->resources) free(obj->resources);
 	obj->resources=(int*)malloc(sizeof(int)*num_res);
 	for(i=0;i<num_res;i++){
@@ -184,10 +183,9 @@ int objectGetY(object* obj){
 }
 
 int* objectGetResources(object* obj){
+	int i, *res;
 	if((obj==NULL)||(obj->type==-1)) return NULL;
 
-	int i;
-	int* res;
 	res=(int*)malloc(sizeof(int)*(obj->num_res));
 	for(i=0;i<obj->num_res;i++){
 		res[i]=obj->resources[i];

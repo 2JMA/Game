@@ -28,6 +28,7 @@ pthread_mutex_t mutex;
 Image *createImage(char *fileName, int r, int c, int bgColor, int fgColor, Place *place){
 	Image *img;
 	char *p, *src;
+	int temp;
 	if(fileName == NULL) return NULL;
 	if(place == NULL) return NULL;
 	src = fileToStr(fileName);
@@ -44,7 +45,6 @@ Image *createImage(char *fileName, int r, int c, int bgColor, int fgColor, Place
 	img->src = src;
 
 	/*Get the number of rows and columns of the str, as if it was a matrix*/
-	int temp;
 	for(p=src, img->nColumns=1, img->nRows=1, temp=1; *p!='\0'; p++){
 		/*I don't know how it wors, it is from stackoverflow*/
 		if ((*p & 0xC0) != 0x80) ++temp;
@@ -137,17 +137,17 @@ struct thread_args{
 
 /*Auxiliar function to move the image slowly to an exact position*/
 void *imageSmoothMoveToAux_thread(void *arguments){
-	int i, j;
+	int i, diff, s;
 	PlaceAvailable result;
 	struct thread_args *args;
-	if(arguments == NULL) return ERROR;
+	if(arguments == NULL) pthread_exit(NULL);
 	args = (struct thread_args *)arguments;
 
 	if(args->img->iColumn == args->y){
 		/*printf("Caso 1\n");*/
 		/*We need the number of positions and the sign of the slide*/
-		int diff = args->x - args->img->iRow;
-		int s = diff/abs(diff);
+		diff = args->x - args->img->iRow;
+		s = diff/abs(diff);
 		diff = abs(diff);
 		for(i=0; i<diff; i + s){
 			result = imageMove(args->img, 0, s);
@@ -162,8 +162,8 @@ void *imageSmoothMoveToAux_thread(void *arguments){
 		pthread_exit(NULL);
 	}else if(args->img->iRow == args->x){
 		/*printf("Caso 2\n");*/
-		int diff = args->y - args->img->iColumn;
-		int s = diff/abs(diff);
+		diff = args->y - args->img->iColumn;
+		s = diff/abs(diff);
 		diff = abs(diff);
 		for(i=0; i<diff; i + s){
 			result = imageMove(args->img, s, 0);
@@ -180,6 +180,7 @@ void *imageSmoothMoveToAux_thread(void *arguments){
 		/*printf("Caso 3\n");*/
 
 	}
+	return NULL;
 }
 
 PlaceAvailable imageSmoothMoveToAux(Image *img, int x, int y, int time){
@@ -246,7 +247,7 @@ PlaceAvailable imageSmoothMoveTo(Image *img, int x, int y, int time, Bool wait){
 
 /*Move the image slowly by incrementing its position*/
 PlaceAvailable imageSmoothMove(Image *img, int x, int y){
-
+	return -1;
 }
 
 /*Auxiliar image to detect wether to images are really near or not
@@ -341,6 +342,7 @@ Position imagesNearAux(Image *img1, Image *img2){
 /*Return TRUE just if the two images are strictly next to each other*/
 Position imagesNear(Image *img1, Image *img2){
 	int c1x, c2x, c1y, c2y;
+	double dist, rad1, rad2, radMax;
 	if(img1 ==  NULL || img2 == NULL) return -1;
 
 	c1x = img1->iColumn + img1->nColumns/2;
@@ -348,10 +350,10 @@ Position imagesNear(Image *img1, Image *img2){
 	c1y = img1->iRow + img1->nRows/2;
 	c2y = img2->iRow + img2->nRows/2;
 
-	double dist = sqrt( pow(c1x-c2x, 2) + pow(c1y-c2y, 2));
-	double rad1 = sqrt( pow(img1->nColumns, 2) + pow(img1->nRows, 2));
-	double rad2 = sqrt( pow(img2->nColumns, 2) + pow(img2->nRows, 2));
-	double radMax = rad1;
+	dist = sqrt( pow(c1x-c2x, 2) + pow(c1y-c2y, 2));
+	rad1 = sqrt( pow(img1->nColumns, 2) + pow(img1->nRows, 2));
+	rad2 = sqrt( pow(img2->nColumns, 2) + pow(img2->nRows, 2));
+	radMax = rad1;
 	if(rad1 < rad2) radMax = rad2;
 
 	/*_move_cursor_to(0, 0);
@@ -385,7 +387,7 @@ int getImageCols(Image *img){
 /*Just for debugging, print the image info in the left upper corner*/
 int printImageData(Image *i){
 	_move_cursor_to(0, 0);
-	printf("%d, %d\n%d, %d", i->iColumn, i->iRow, i->nColumns, i->nRows);
+	return printf("%d, %d\n%d, %d", i->iColumn, i->iRow, i->nColumns, i->nRows);
 }
 
 int imagePrint(Image *img){
@@ -415,7 +417,7 @@ int imagePrint(Image *img){
 }
 
 void imageClear(Image *img){
-    int i, j, nRows;
+    int i, j;
     char bg;
     if(img == NULL) return;
 

@@ -12,10 +12,9 @@ struct _Resource{
 };
 
 resource* iniResource(char* name, int type, int max, int min, int value){
-	if(type==-1){
-		return NULL;
-	} 
 	resource *r;
+	if(type==-1) return NULL;
+	
 	r = (resource*)malloc(sizeof(resource));
 	if(r==NULL){
 		return NULL;

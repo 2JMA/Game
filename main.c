@@ -40,7 +40,7 @@ struct termios initial;
 void _term_init() {
 	struct termios new;	          /*a termios structure contains a set of attributes about
 					  how the terminal scans and outputs data*/
-
+	
 	tcgetattr(fileno(stdin), &initial);    /*first we get the current settings of out
 						 terminal (fileno returns the file descriptor
 						 of stdin) and save them in initial. We'd better

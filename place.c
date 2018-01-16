@@ -27,13 +27,14 @@ struct _Place{
 Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char wall, char bg){
 	int i, j, temp;
 	char *p, *map;
+	Place *place;
 	Status result;
 	if(fileName == NULL) return NULL;
 
 	map = fileToStr(fileName);
 	if(map == NULL) return NULL;
 
-	Place *place = (Place*)malloc(sizeof(place[0]));
+	place = (Place*)malloc(sizeof(place[0]));
 	if(place == NULL) return NULL;
 
 	place->bgColor = bgColor;
@@ -165,8 +166,8 @@ Status setUpPlace(Place *p, char *data){
 
 /*Return true if the place available between xi-xf and yi-yf is free*/
 PlaceAvailable placeAvailable(Place *p, int xi, int xf, int yi, int yf){
-	if(p == NULL) return ERROR;
 	int i, j;
+	if(p == NULL) return ERROR;
 
 	if(xi < p->iColumn || yi < p->iRow) return ERROR;
 	if(xf > p->nColumns + p->iColumn || yf > p->nRows + p->iRow) return ERROR;

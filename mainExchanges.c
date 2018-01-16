@@ -119,11 +119,11 @@ location _read_key() {
 
 
 int exchange(character** chars){
+	object *a, *b;
+	character *mChar;
 	if(chars==NULL) return -1;
-	object* a, *b;
-	character* mChar;
+	
 	mChar=charGetNextTo(chars);
-
 	if(mChar==NULL){
 		nprint("No hay nadie al lado\n", OR_BG, CYAN_BG, 1, 1);
 		return 0;
@@ -163,7 +163,7 @@ int exchange(character** chars){
 }
 
 int main(){
-	character* mChar, *a, *b, *c, *d, **chars;
+	character **chars;
 	Image *player, *ai, *bi, *ci, *di, *obj1, *obj2, *obj3, *obj4, *obj5;
 	object *foto, *pan, *cigarrillos, *cuchillo, *sombrero_nazi;
 	Place* map;
@@ -211,7 +211,6 @@ int main(){
 	imagePrint(di);
 
 	location dir;
-	Position near1;
 	int times = 0;
 	while(times < 500){
 

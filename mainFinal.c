@@ -227,7 +227,6 @@ void *thread_program_running(){
 }
 
 void main(){
-	int MAX_X, MAX_Y;
 	char line[MAX_LINE];
 	pthread_t read_keys, near_thread, evil_thread, shoot_thread, running_thread;
 	location dir;
