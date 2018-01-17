@@ -3,9 +3,11 @@
 #include <string.h>
 #include <memory.h>
 #include <string.h>
+#include <pthread.h>
 #include "nprint.h"
 #include "types.h"
 
+pthread_mutex_t mutex;
 
 /*
   Prints on the screen the style for writing on this window,
@@ -87,10 +89,12 @@ void imageClear(Image *img){
 
 int nprint(char *text, int bgColor, int fgColor, int r, int c){
     int n;
+    pthread_mutex_lock(&mutex);
     _prepare_font(bgColor, fgColor);
     _move_cursor_to(r, c);
     n = printf("%s", text);
     fflush(stdout);
     _prepare_font(OR_BG, OR_FG);
+    pthread_mutex_unlock(&mutex);
     return n;
 }
