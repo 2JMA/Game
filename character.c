@@ -1,6 +1,7 @@
 #include "character.h"
 #include "image.h"
 #include "nprint.h"
+#include "place.h"
 #include <string.h>
 #include <stdlib.h>
 #define CYAN_BG 46
@@ -154,23 +155,23 @@ character* charGetNextTo(character** chars){
 	return NULL;
 }
 
-Status charPrintInfo(character** chars){
+Status charPrintInfo(character** chars, Place* place){
 	character* mChar;
 	char* s;
 	if(chars==NULL) return ERROR;
 	
 	mChar=charGetNextTo(chars);
 	if(mChar==NULL){
-		nprint("No hay nadie al lado.\n", OR_BG, CYAN_BG, 1, 1);
+		printInsidePlace(place, "No hay nadie al lado.\n", placeGetFgColor(place));
 		return OK;
 	}
 	s=charGetInfo(mChar);
 	if(s==NULL) return ERROR;
 	if(strcmp(s,"cero")==0){
-		nprint("No tiene nada que decir.\n", OR_BG, CYAN_BG, 1, 1);
+		printInsidePlace(place, "No tiene nada que decir.\n",placeGetFgColor(place));
 		return OK;
 	}
-	nprint(s, OR_BG, CYAN_BG, 1, 1);
+	printInsidePlace(place, s, placeGetFgColor(place));
 	return OK;
 }
 

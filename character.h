@@ -37,7 +37,7 @@ int charGetY(character* mChar);
 
 character* charGetNextTo(character** chars);
 
-Status charPrintInfo(character** chars);
+Status charPrintInfo(character** chars, Place* place);
 
 /*character** getCharactersFromFile(char* file, object** objects);*/
 
