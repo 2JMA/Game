@@ -10,18 +10,6 @@
 #include "nprint.h"
 #include "utils.h"
 
-#define CYAN_BG 46
-#define RED_BG 41
-#define MAGENTA_BG 45
-
-#define CYAN_FG 36
-#define RED_FG 31
-#define WHITE_BG 47
-#define WHITE_FG 37
-#define BLACK_BG 40
-#define BLACK_FG 30
-
-
 
 struct termios initial;
 
@@ -118,20 +106,20 @@ location _read_key() {
 
 
 
-int exchange(character** chars){
+int exchange(character** chars, Place *text){
 	object *a, *b;
 	character *mChar;
 	if(chars==NULL) return -1;
 	
 	mChar=charGetNextTo(chars);
 	if(mChar==NULL){
-		nprint("No hay nadie al lado\n", OR_BG, CYAN_BG, 1, 1);
+		printInsidePlace(text, "No hay nadie al lado\n", placeGetFgColor(text));
 		return 0;
 	}
 
 	a=charGetNeeds(mChar);
 	if(a==NULL){
-		nprint("No tiene nada que intercambiar\n", OR_BG, CYAN_BG, 1, 1);	
+		printInsidePlace(text, "No tiene nada que intercambiar\n", placeGetFgColor(text));
 		return 0;
 	}
 
@@ -153,12 +141,12 @@ int exchange(character** chars){
 			return 1;
 		}
 
-		nprint("Objeto conseguido.\n", OR_BG, CYAN_BG, 1, 1);
+		printInsidePlace(text, "Objeto conseguido.\n", placeGetFgColor(text));
 		
 		return 0;
 	}
 	
-	nprint("NO tienes el objeto necesario.\n", OR_BG, CYAN_BG, 1, 1);
+	printInsidePlace(text, "NO tienes el objeto necesario.\n", placeGetFgColor(text));
 	return 0;
 }
 
@@ -166,14 +154,15 @@ int main(){
 	character **chars;
 	Image *player, *ai, *bi, *ci, *di, *obj1, *obj2, *obj3, *obj4, *obj5;
 	object *foto, *pan, *cigarrillos, *cuchillo, *sombrero_nazi;
-	Place* map;
+	Place* map, *text, *info;
 	int ret=0, i;
 
 	_term_init();
 	_init_screen();
 
-	map=createPlace(1, 1, "./Maps/map.txt", OR_BG, WHITE_FG, '#', '.');
-
+	map=createPlace(1, 1, "./Maps/square1.txt", OR_BG, WHITE_FG, '#', '.');
+	text = createPlace(placeGetLastRow(map)+1, placeGetFirstColumn(map), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
+	info = createPlace(placeGetFirstRow(map), placeGetLastColumn(map)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
 	player=createImage( "./Images/prueba.txt", 13, 40, OR_BG, CYAN_FG, map);
 
 	ai=createImage( "./Images/1.txt", 3, 3, OR_BG, RED_FG, map);
@@ -204,6 +193,8 @@ int main(){
 	chars[5]=NULL;
 
 	printPlace(map);
+	printPlace(text);
+	printPlace(info);
 	imagePrint(player);
 	imagePrint(ai);
 	imagePrint(bi);
@@ -222,7 +213,7 @@ int main(){
 		imagePrint(ci);
 		imagePrint(di);
 		if(dir.x==2 && dir.y==2){
-			ret=exchange(chars);
+			ret=exchange(chars, text);
 
 			if(ret==-1){
 				imageClear(player);
@@ -231,6 +222,8 @@ int main(){
 				imageClear(ci);
 				imageClear(di);
 				freePlace(map);
+				freePlace(text);
+				freePlace(info);
 				for(i=0; i<5; i++){
 					freeCharacter(chars[i]);
 				}
@@ -245,7 +238,7 @@ int main(){
 			} 
 
 			if(ret==1){
-				nprint("HAS GANADO!\n", OR_BG, CYAN_FG, 1, 26);
+				printInsidePlace(text, "HAS GANADO!\n", placeGetFgColor(text));
 				sleep(5000);
 				imageClear(player);
 				imageClear(ai);
@@ -253,6 +246,8 @@ int main(){
 				imageClear(ci);
 				imageClear(di);
 				freePlace(map);
+				freePlace(text);
+				freePlace(info);
 				for(i=0; i<5; i++){
 					freeCharacter(chars[i]);
 				}
@@ -266,7 +261,7 @@ int main(){
 				return 0;
 			}
 		}else if(dir.x==1 && dir.y==1){
-			charPrintInfo(chars);
+			charPrintInfo(chars, text);
 		}else if(dir.x==-1 && dir.y==-1){
 			imageClear(player);
 			imageClear(ai);
@@ -274,6 +269,8 @@ int main(){
 			imageClear(ci);
 			imageClear(di);
 			freePlace(map);
+			freePlace(text);
+			freePlace(info);
 			for(i=0; i<5; i++){
 				freeCharacter(chars[i]);
 			}
@@ -286,7 +283,7 @@ int main(){
 			_term_reset();
 			return -1;
 		}else if(dir.x==-2 && dir.y==-2){
-			nprint("No existe ese comando.\n", OR_BG, CYAN_BG, 1, 1);
+			printInsidePlace(text, "No existe ese comando.\n", placeGetFgColor(text));
 		}else{
 			imageMove(player, dir.x, dir.y);
 			imageMove(ai, 0, 0);
@@ -296,7 +293,7 @@ int main(){
 		}
 		times++;
 	}
-	nprint("Han pasado los 500 movimientos.\n", OR_BG, CYAN_FG, 1, 26);
+	printInsidePlace(text, "Han pasado los 500 movimientos.\n", placeGetFgColor(text));
 	sleep(5000);
 	imageClear(player);
 	imageClear(ai);
@@ -304,6 +301,8 @@ int main(){
 	imageClear(ci);
 	imageClear(di);
 	freePlace(map);
+	freePlace(text);
+	freePlace(info);
 	for(i=0; i<5; i++){
 		freeCharacter(chars[i]);
 	}
