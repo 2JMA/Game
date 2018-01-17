@@ -90,8 +90,10 @@ void imageClear(Image *img){
 int nprint(char *text, int bgColor, int fgColor, int r, int c){
     int n;
     pthread_mutex_lock(&mutex);
+    if( bgColor!=-1 && fgColor!=-1)
     _prepare_font(bgColor, fgColor);
-    _move_cursor_to(r, c);
+    if(r!=-1 && c!=-1)
+        _move_cursor_to(r, c);
     n = printf("%s", text);
     fflush(stdout);
     _prepare_font(OR_BG, OR_FG);
