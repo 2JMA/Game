@@ -52,3 +52,10 @@ void sleep(unsigned int miliSeconds){
     clock_t goal = miliSeconds*1000 + clock();
     while (goal > clock());
 }
+
+void multLocation(location *loc, int num){
+	if(loc == NULL) return;
+
+	(loc->x) *= num;
+	(loc->y) *= num;
+}

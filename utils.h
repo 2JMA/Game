@@ -20,9 +20,20 @@ typedef struct thread_shoot_args{
      or +1 if it goes down*/
 }thread_shoot_args;
 
+typedef struct thread_guard_args{
+    Image *amok;
+    Place *textRect;
+    int speed;
+    int numImg;
+    int *moveType;
+    Image **images;
+    location *moveDir;
+}thread_guard_args;
+
 
 char *fileToStr(char *file);
 
 /*Stops the program x miliseconds*/
 void sleep(unsigned int miliSeconds);
+void multLocation(location *loc, int num);
 #endif /* UTILS_H */
