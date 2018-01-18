@@ -18,6 +18,11 @@ void printPlace(Place *place);
 one line for each side as wall*/
 int printInsidePlace(Place *place, char *text, int color);
 
+/*Print some text inside a place that is just a rectangle, with no more that
+one line for each side as wall
+In this case we can divide it into different rows and update them one by one*/
+int printInsidePlaceRows(Place *place, char *text, int color, int total, int row);
+
 /*Return true if the place available between xi-xf and yi-yf is free*/
 PlaceAvailable placeAvailable(Place *p, int xi, int xf, int yi, int yf);
 /*A series of functions to get propierties of a place*/
