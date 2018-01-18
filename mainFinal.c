@@ -169,34 +169,34 @@ void *thread_program_running(void *p){
 	}
 }
 
-void main(){
-	char line[MAX_LINE];
+int finalGame(Place *map, Place *textRect, Place *infoRect, Image *amok){
 	pthread_t evil_thread, shoot_thread, running_thread;
 	location dir;
 	thread_near_args args;
 	thread_shoot_args shootArgs;
 
-	_term_init();
-	_init_screen();
+	char *mapStr;
+	Status result;
+	/*Set up the images and places*/
+	Image *evil = createImage("Images/hitler.txt", 3, 20 , OR_BG, CYAN_FG, map);
+	result = imageMoveTo(amok, 100, 20);
+	mapStr = fileToStr("Maps/square1.txt");
+	if(mapStr == NULL) return -1;
+	result = setUpPlace(map, mapStr);
+	free(mapStr);
+	if(result != OK){
+		nprint("CUIDADO, NO CARGA", -1, -1, NUM_ROWS -1, NUM_COLS-1);
+		return -1;
+	}
 
-	Place *place = createPlace(1, 1, "Maps/square1.txt", OR_BG, YELLOW_FG, '#', ' ');
-	Place *textRect = createPlace(placeGetLastRow(place)+1, placeGetFirstColumn(place), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
-	Place *infoRect = createPlace(placeGetFirstRow(place), placeGetLastColumn(place)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
-	Image *iBear = createImage("Images/amok.txt", 40, 20 , OR_BG, RED_FG, place);
-	Image *evil = createImage("Images/hitler.txt", 3, 20 , OR_BG, CYAN_FG, place);
-
-	/*printf("%d, %d\n", placeGetFirstRow(textRect), placeGetFirstColumn(textRect));
-
-	printInsidePlace(textRect, "You have beaten the final evil, Marabini, and you should be proud of yourself, not too many people achive it, and this should be a long text in order to test the print funtion.", placeGetFgColor(place));
-	exitGame(0);*/
-
-	printPlace(place);
+	printPlace(map);
 	printPlace(textRect);
 	printPlace(infoRect);
-	imagePrint(iBear);
+	imagePrint(amok);
 	imagePrint(evil);
 
-	Image *imgs[] = {iBear, evil};
+	/*Game itself*/
+	Image *imgs[] = {amok, evil};
 	args.img = imgs;
 	args.numImg = 2;
 	args.pos = 0;
@@ -205,8 +205,8 @@ void main(){
 	dir.x = 0;
 	dir.y = 0;
 
-	shootArgs.shooter = iBear;
-	shootArgs.place = place;
+	shootArgs.shooter = amok;
+	shootArgs.place = map;
 	shootArgs.evil = evil;
 	shootArgs.move = -1;
 
@@ -220,7 +220,7 @@ void main(){
 			dir.x = 0;
 			dir.y = 0;
 		}else if(dir.x !=0 || dir.y != 0){
-			imageMove(iBear, dir.x, dir.y);
+			imageMove(amok, dir.x, dir.y);
 			imagePrint(evil);
 			dir.x = 0;
 			dir.y = 0;
@@ -230,9 +230,34 @@ void main(){
 
 	pthread_cancel(running_thread);
 	pthread_cancel(evil_thread);
-	freeImage(iBear);
+
 	freeImage(evil);
+	return 1;
+}
+
+void main(){
+	_term_init();
+	_init_screen();
+
+	Place *place = createPlace(1, 1, "Maps/square1.txt", OR_BG, YELLOW_FG, '#', ' ');
+	Place *textRect = createPlace(placeGetLastRow(place)+1, placeGetFirstColumn(place), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
+	Place *infoRect = createPlace(placeGetFirstRow(place), placeGetLastColumn(place)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
+	Image *amok = createImage("Images/amok.txt", 40, 20 , OR_BG, RED_FG, place);
+	
+
+	/*printf("%d, %d\n", placeGetFirstRow(textRect), placeGetFirstColumn(textRect));
+
+	printInsidePlace(textRect, "You have beaten the final evil, Marabini, and you should be proud of yourself, not too many people achive it, and this should be a long text in order to test the print funtion.", placeGetFgColor(place));
+	exitGame(0);*/
+
+	finalGame(place, textRect, infoRect, amok);
+
+
+	
+	freeImage(amok);
 	freePlace(place);
+	freePlace(textRect);
+	freePlace(infoRect);
 	exitGame(0);
 	return;
 }
