@@ -94,31 +94,11 @@ location _read_key() {
  	return dir;
 }
 
-void thread_function_move_recta12(Image* im){
-	int i;
-	if (im==NULL) return;
-
-	while(1){
-		for(i=1; i<=30; i++){
-			imageMove(im, 1, 0);
-			sleep(200);
-		}
-
-		for(i=1; i<=30; i++){
-			imageMove(im, -1, 0);
-			sleep(200);
-		}
-	}
-}
-
 void thread_function_move(thread_guard_args* args){
 	int i;
 	PlaceAvailable result;
 	Position p;
-	if (args==NULL){
-		printInsidePlace(args->textRect, "ARGS == NULL", placeGetFgColor(args->textRect));
-		return;
-	}
+	if (args==NULL) return;
 
 	imagePrint(args->amok);
 	for(i=0; i<args->numImg; i++){
@@ -137,8 +117,6 @@ void thread_function_move(thread_guard_args* args){
 
 			p = imagesNear(args->amok, (Image *)args->images[i]);
 			if(p == INSIDE || p == NEAR){
-				printInsidePlace(args->textRect, "OOH, YOU HAVE BEEN KILLED", placeGetFgColor(args->textRect));
-				_move_cursor_to(placeGetLastRow(args->textRect)+1, 1);
 				args->res = 0;
 				pthread_exit(NULL);
 			}
@@ -157,6 +135,11 @@ void thread_function_move(thread_guard_args* args){
 void modifyGuards(thread_guard_args *args){
 
 	if (args->res==0){
+		if (args->level==1){
+			printInsidePlace(args->textRect, "LEVEL 1", OR_BG);
+		}else if (args->level==2){
+			printInsidePlace(args->textRect, "LEVEL 2", OR_BG);
+		}
 		args->res=-1;
 	}else if (args->res==1){
 		if (args->level==1){
@@ -164,12 +147,14 @@ void modifyGuards(thread_guard_args *args){
 			args->numImg = 5;
 			args->speed = 50;
 			args->level=2;
+			printInsidePlace(args->textRect, "LEVEL 2", OR_BG);
 		}
 		else if (args->level==2){
 			args->res = -1;
 			args->numImg = 7;
 			args->speed = 30;
 			args->level=3;
+			printInsidePlace(args->textRect, "LEVEL 3", OR_BG);
 		}
 
 	}
@@ -201,36 +186,38 @@ void modifyGuards(thread_guard_args *args){
 
 }
 
-void main(){
-	int MAX_X, MAX_Y;
-	char line[MAX_LINE];
+int mainImpossible(Place *map, Place *textRect, Place *infoRect, Image *amok){
+	char *mapStr;
 	pthread_t guardThread;
 	thread_guard_args guardArgs;
 	location l1, l2, l3, l4, l5, l6, l7;
 	PlaceAvailable result;
 
-	_term_init();
-	_init_screen();
+	/*Set up the images and places*/
+	imageMoveTo(amok, 4, 4);
+	mapStr = fileToStr("Maps/ImpossibleGameMap.txt");
+	if(mapStr == NULL) return -1;
+	result = setUpPlace(map, mapStr);
+	free(mapStr);
 
-	Place *place = createPlace(1, 1, "Maps/ImpossibleGameMap.txt", OR_BG, YELLOW_FG, '#', ' ');
-	Place *textRect = createPlace(placeGetLastRow(place)+1, placeGetFirstColumn(place), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
-	Place *infoRect = createPlace(placeGetFirstRow(place), placeGetLastColumn(place)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
+	printPlace(map);
 	printPlace(textRect);
 	printPlace(infoRect);
-	Image *amok = createImage("Images/amok.txt", 2, 2 , OR_BG, RED_FG, place);
-	Image *im1 = createImage("Images/guard.txt", 6, 10 , OR_BG, CYAN_FG, place);
-	Image *im2 = createImage("Images/guard.txt", 16, 40 , OR_BG, CYAN_FG, place);
-	Image *im3 = createImage("Images/guard.txt", 8, 15 , OR_BG, CYAN_FG, place);
-	Image *im4 = createImage("Images/guard.txt", 8, 15 , OR_BG, CYAN_FG, place);
-	Image *im5 = createImage("Images/guard.txt", 8, 15 , OR_BG, CYAN_FG, place);
-	Image *im6 = createImage("Images/guard.txt", 8, 15 , OR_BG, CYAN_FG, place);
-	Image *im7 = createImage("Images/guard.txt", 8, 15 , OR_BG, CYAN_FG, place);
+	imagePrint(amok);
 
+
+	/*Game itself*/
+	Image *im1 = createImage("Images/guard.txt", 6, 10 , OR_BG, CYAN_FG, map);
+	Image *im2 = createImage("Images/guard.txt", 16, 40 , OR_BG, CYAN_FG, map);
+	Image *im3 = createImage("Images/guard.txt", 8, 15 , OR_BG, CYAN_FG, map);
+	Image *im4 = createImage("Images/guard.txt", 8, 15 , OR_BG, CYAN_FG, map);
+	Image *im5 = createImage("Images/guard.txt", 8, 15 , OR_BG, CYAN_FG, map);
+	Image *im6 = createImage("Images/guard.txt", 8, 15 , OR_BG, CYAN_FG, map);
+	Image *im7 = createImage("Images/guard.txt", 8, 15 , OR_BG, CYAN_FG, map);
+	
 	location dir;
-	Position near1,near2,near3;
-	int times = 0, i=0, fwin=0, op=0;
+	int times = 0;
 
-	/*LEVEL 1*/
 	imageMoveTo(amok, 2, 2);
 	imageMoveTo(im1, 60, 20);
 	imageMoveTo(im4, 80, 40);
@@ -239,7 +226,7 @@ void main(){
 	imageMoveTo(im5, 140, 30);
 	imageMoveTo(im7, 160, 30);
 	imageMoveTo(im3, 180, 30);
-	printPlace(place);
+	printPlace(map);
 	
 	printInsidePlace(textRect, "LEVEL 1\n", OR_BG);	
 
@@ -277,7 +264,6 @@ void main(){
 		result= imageMove(amok, dir.x, dir.y);
 		times++;
 		if(result == DOOR){
-			printInsidePlace(textRect, "CONGRATS! YOU PASSED THE LEVEL", placeGetFgColor(textRect));
 			guardArgs.res=1;
 			/*Let the thread recognize that we have won*/
 			sleep(100);
@@ -289,9 +275,10 @@ void main(){
 			pthread_create(&guardThread, NULL, thread_function_move, &guardArgs);
 		}
 	}
+	printInsidePlace(textRect, "CONGRATS, YOU WON", OR_BG);
 	pthread_cancel(guardThread);
 
-	freeImage(amok);
+
 	freeImage(im1);
 	freeImage(im2);
 	freeImage(im3);
@@ -299,6 +286,24 @@ void main(){
 	freeImage(im5);
 	freeImage(im6);
 	freeImage(im7);
+
+	return 1;
+}
+
+void main(){
+	
+
+	_term_init();
+	_init_screen();
+
+	Place *place = createPlace(1, 1, "Maps/ImpossibleGameMap.txt", OR_BG, YELLOW_FG, '#', ' ');
+	Place *textRect = createPlace(placeGetLastRow(place)+1, placeGetFirstColumn(place), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
+	Place *infoRect = createPlace(placeGetFirstRow(place), placeGetLastColumn(place)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
+	Image *amok = createImage("Images/amok.txt", 2, 2 , OR_BG, RED_FG, place);
+
+	mainImpossible(place, textRect, infoRect, amok);
+
+	freeImage(amok);	
 	freePlace(place);
 	_term_reset();
 	return;

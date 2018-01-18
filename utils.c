@@ -61,6 +61,7 @@ void multLocation(location *loc, int num){
 	(loc->x) *= num;
 	(loc->y) *= num;
 }
+
 void exitGame(int mode){
 	struct termios new;	       
 	tcgetattr(fileno(stdin), &new);    
