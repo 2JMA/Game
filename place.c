@@ -189,6 +189,65 @@ int printInsidePlace(Place *place, char *text, int color){
     return n;
 }
 
+
+int printInsidePlaceRows(Place *place, char *text, int color, int total, int row){
+	int n, iCol, iRow, i, j;
+	char *c;
+	if(place == NULL || text == NULL) return -1;
+	if(strlen(text) > (place->nRows-4)*(place->nColumns-4)) return -1;
+	if(row > total) return -1;
+
+	n = 0;
+	iCol = place->iColumn + 2;
+	if(place->iColumn <= 0){
+		iCol = 3;
+	}
+
+	iRow = (place->nRows / total)*(row-1) +3;
+
+	/*Clear the positions we are going to print in*/
+	for(j=iRow; j<=iRow+(place->nRows / total); j++){
+		_move_cursor_to(j, iCol);
+		for(i=0; i<place->nColumns-5; i++){
+			n+=printf(" ");
+		}
+	}
+
+	pthread_mutex_lock(&mutex);
+	_move_cursor_to(iRow, iCol);
+	_prepare_font(place->bgColor, color);
+
+	if(strlen(text) < place->nColumns-4){
+		/*The text fits in just one line*/
+		n += printf("%s", text);
+	}else{
+		for(c=text, i=0, j=0; *c != '\0'; c++, i++){
+			/*i is the number of column, j is the number of row*/
+			if(*c == '\n'){
+				i = 0;
+				j++;
+				_move_cursor_to(iRow+j, iCol);
+			}else if(i < place->nColumns-5){
+				n+=printf("%c", *c);
+			}else if(i == place->nColumns-5 && (*c!='\n' || *c!=' ')){
+				n+=printf("-");
+				i = 0;
+				j++;
+				_move_cursor_to(iRow+j, iCol);
+				n+=printf("%c", *c);
+			}else{
+				_move_cursor_to(iRow+j, iCol);
+				n+=printf("%c", *c);
+			}
+		}
+	}
+
+	fflush(stdout);
+    _prepare_font(OR_BG, OR_FG);
+    pthread_mutex_unlock(&mutex);
+    return n;
+}
+
 void freePlace(Place *p){
 	int i;
 	if(p == NULL) return;

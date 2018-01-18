@@ -107,73 +107,80 @@ location _read_key() {
 
 
 int exchange(character** chars, Place *text){
-	object *a, *b;
+	object *a, *b, **arr;
 	character *mChar;
 	if(chars==NULL) return -1;
 	
 	mChar=charGetNextTo(chars);
 	if(mChar==NULL){
-		printInsidePlace(text, "No hay nadie al lado\n", placeGetFgColor(text));
+		printInsidePlace(text, "There is noone near.\n", placeGetFgColor(text));
 		return 0;
 	}
 
 	a=charGetNeeds(mChar);
 	if(a==NULL){
-		printInsidePlace(text, "No tiene nada que intercambiar\n", placeGetFgColor(text));
+		printInsidePlace(text, "I don't need anything in this moment.\n", placeGetFgColor(text));
 		return 0;
 	}
 
 	if(objectGetPicked(a)){
-
 				
-		b=charGetObject(mChar);
+		arr=charGetObject(mChar);
+		b=arr[0];
+		
 		objectSetPicked(b, 1);
 		objectSetPickable(b, 0);
-		objectSetLocation(b, X_ELSE, Y_ELSE);
+
 
 		objectSetPicked(a, 0);
 		objectSetPickable(a, 0);
-		objectSetLocation(a, X_ELSE, Y_ELSE);
-		charSetObject(mChar, a);
+
+		charAddObject(mChar, a);
+		charAddObject(chars[0], b);
+		charDropObject(chars[0], a);
+		charDropObject(mChar, b);
+
 		charSetNeeds(mChar, NULL);
 
 		if(strcmp(objectGetName(b),"sombrero nazi")==0){
 			return 1;
 		}
 
-		printInsidePlace(text, "Objeto conseguido.\n", placeGetFgColor(text));
+		printInsidePlace(text, "Object received.\n", placeGetFgColor(text));
 		
 		return 0;
 	}
 	
-	printInsidePlace(text, "NO tienes el objeto necesario.\n", placeGetFgColor(text));
+	printInsidePlace(text, "You don't have the necessary object.\n", placeGetFgColor(text));
 	return 0;
 }
 
 int main(){
 	character **chars;
 	Image *player, *ai, *bi, *ci, *di, *obj1, *obj2, *obj3, *obj4, *obj5;
-	object *foto, *pan, *cigarrillos, *cuchillo, *sombrero_nazi;
+	object **ob_arr, **ob_arr1, **ob_arr2, **ob_arr3, **ob_arr4, *foto, *pan, *cigarrillos, *cuchillo, *sombrero_nazi;
 	Place* map, *text, *info;
 	int ret=0, i;
 
 	_term_init();
 	_init_screen();
 
-	map=createPlace(1, 1, "./Maps/square1.txt", OR_BG, WHITE_FG, '#', '.');
+	map=createPlace(1, 1, "Maps/MapExchanges.txt", OR_BG, WHITE_FG, ',', ' ');
 	text = createPlace(placeGetLastRow(map)+1, placeGetFirstColumn(map), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
 	info = createPlace(placeGetFirstRow(map), placeGetLastColumn(map)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
-	player=createImage( "./Images/prueba.txt", 13, 40, OR_BG, CYAN_FG, map);
 
-	ai=createImage( "./Images/1.txt", 3, 3, OR_BG, RED_FG, map);
-	bi=createImage( "./Images/2.txt", 3, 50, OR_BG, RED_FG, map);
-	ci=createImage( "./Images/3.txt", 22, 3, OR_BG, RED_FG, map);
-	di=createImage( "./Images/prueba.txt", 22, 49, OR_BG, RED_FG, map);
-	obj1=createImage( "./Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
-	obj2=createImage( "./Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
-	obj3=createImage( "./Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
-	obj4=createImage( "./Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
-	obj5=createImage( "./Images/1.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
+
+	player=createImage( "Images/amok.txt", 5, 12, OR_BG, CYAN_FG, map);
+
+	ai=createImage( "Images/jew.txt", 48, 11, OR_BG, RED_FG, map);
+	bi=createImage( "Images/jew.txt", 10, 72, OR_BG, RED_FG, map);
+	ci=createImage( "Images/jew.txt", 25, 163, OR_BG, RED_FG, map);
+	di=createImage( "Images/guard.txt", 42, 177, OR_BG, RED_FG, map);
+	obj1=createImage( "Images/jew.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
+	obj2=createImage( "Images/jew.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
+	obj3=createImage( "Images/jew.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
+	obj4=createImage( "Images/jew.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
+	obj5=createImage( "Images/jew.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
 
 
 	foto=iniObject("foto", 1, 1, 0, obj1, 0, NULL);
@@ -182,14 +189,48 @@ int main(){
 	cuchillo=iniObject("cuchillo", 4, 0, 0, obj4, 0, NULL);
 	sombrero_nazi=iniObject("sombrero nazi", 5, 0, 0, obj5, 0, NULL);
 
+	ob_arr=(object**)malloc(sizeof(object*)*10);
+	ob_arr[0]=foto;
+	for(i=1; i<10; i++){
+		ob_arr[i]=NULL;
+	}
+	if(ob_arr[0]==NULL){
+		printf("NULL\n");
+		return -1;
+	}
+
+	ob_arr1=(object**)malloc(sizeof(object*)*10);
+	ob_arr1[0]=pan;
+	for(i=1; i<10; i++){
+		ob_arr1[i]=NULL;
+	}
+
+	ob_arr2=(object**)malloc(sizeof(object*)*10);
+	ob_arr2[0]=cigarrillos;
+	for(i=1; i<10; i++){
+		ob_arr2[i]=NULL;
+	}
+
+	ob_arr3=(object**)malloc(sizeof(object*)*10);
+	ob_arr3[0]=cuchillo;
+	for(i=1; i<10; i++){
+		ob_arr3[i]=NULL;
+	}
+
+	ob_arr4=(object**)malloc(sizeof(object*)*10);
+	ob_arr4[0]=sombrero_nazi;
+	for(i=1; i<10; i++){
+		ob_arr4[i]=NULL;
+	}
+	
 	chars=(character**)malloc(sizeof(character*)*6);
 
-	chars[0]=iniCharacter("amok", player, 1, foto, NULL, NULL);
+	chars[0]=iniCharacter("amok", player, 1, ob_arr, NULL, NULL, NULL);
 
-	chars[1]=iniCharacter("a", ai, 2, pan, foto, "Si tienes una foto te doy pan.");
-	chars[2]=iniCharacter("b", bi, 3, cigarrillos, pan, "Si tienes pan te doy cigarrillos.");
-	chars[3]=iniCharacter("c", ci, 4, cuchillo, cigarrillos, "Si tienes cigarrillos te doy un cuchillo.");
-	chars[4]=iniCharacter("d", di, 5, sombrero_nazi, cuchillo, "Si tienes un cuchillo te doy un sombrero nazi.");
+	chars[1]=iniCharacter("a", ai, 2, ob_arr1, foto, "If you have a photograph, I'll give tou some bread.", NULL);
+	chars[2]=iniCharacter("b", bi, 3, ob_arr2, pan, "If you have bread I'll give you a pack of cigarrettes.", NULL);
+	chars[3]=iniCharacter("c", ci, 4, ob_arr3, cigarrillos, "If you give me cigarrettes i'll give you a knife.", NULL);
+	chars[4]=iniCharacter("d", di, 5, ob_arr4, cuchillo, "If you get me a knife ill give you my nazi hat.", NULL);
 	chars[5]=NULL;
 
 	printPlace(map);
@@ -203,7 +244,7 @@ int main(){
 
 	location dir;
 	int times = 0;
-	while(times < 500){
+	while(times < 1500){
 
 		dir = _read_key();
 		printPlace(map);
@@ -233,6 +274,11 @@ int main(){
 				freeObject(cuchillo);
 				freeObject(pan);
 				freeObject(sombrero_nazi);
+				free(ob_arr);
+				free(ob_arr1);
+				free(ob_arr2);
+				free(ob_arr3);
+				free(ob_arr4);
 				_term_reset();
 				return -1;
 			} 
@@ -257,6 +303,11 @@ int main(){
 				freeObject(cuchillo);
 				freeObject(pan);
 				freeObject(sombrero_nazi);
+				free(ob_arr);
+				free(ob_arr1);
+				free(ob_arr2);
+				free(ob_arr3);
+				free(ob_arr4);
 				_term_reset();
 				return 0;
 			}
@@ -280,6 +331,11 @@ int main(){
 			freeObject(cuchillo);
 			freeObject(pan);
 			freeObject(sombrero_nazi);
+			free(ob_arr);
+			free(ob_arr1);
+			free(ob_arr2);
+			free(ob_arr3);
+			free(ob_arr4);
 			_term_reset();
 			return -1;
 		}else if(dir.x==-2 && dir.y==-2){
@@ -293,7 +349,7 @@ int main(){
 		}
 		times++;
 	}
-	printInsidePlace(text, "Han pasado los 500 movimientos.\n", placeGetFgColor(text));
+	printInsidePlace(text, "Han pasado los 1500 movimientos.\n", placeGetFgColor(text));
 	sleep(5000);
 	imageClear(player);
 	imageClear(ai);
@@ -312,6 +368,11 @@ int main(){
 	freeObject(cuchillo);
 	freeObject(pan);
 	freeObject(sombrero_nazi);
+	free(ob_arr);
+	free(ob_arr1);
+	free(ob_arr2);
+	free(ob_arr3);
+	free(ob_arr4);
 	_term_reset();
 	return 0;
 }

@@ -29,10 +29,17 @@ typedef struct thread_guard_args{
     int res, level, speed;
 }thread_guard_args;
 
+typedef struct thread_info_places{
+    Place *textRect;
+    Place *infoRect;
+}thread_info_places;
+
 
 char *fileToStr(char *file);
 
 /*Stops the program x miliseconds*/
 void sleep(unsigned int miliSeconds);
 void multLocation(location *loc, int num);
+void exitGame(int mode);
+
 #endif /* UTILS_H */
