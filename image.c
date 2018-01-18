@@ -85,6 +85,7 @@ Image *createImage(char *fileName, int r, int c, int bgColor, int fgColor, Place
 void freeImage(Image *img){
 	if(img == NULL) return;
 	if(img->src == NULL) return;
+	imageClear(img);
 	free(img->src);
 	free(img);
 }
@@ -106,7 +107,7 @@ PlaceAvailable imageChangePosition(Image *img, int x, int y){
 	if(y + img->nRows -1 > NUM_ROWS) return ERROR;
 
 	result = placeAvailable(img->place, x, x + img->nColumns, y, y + img->nRows);
-	if(result == OCCUPIED){
+	if(result == OCCUPIED || result == DOOR){
 		return result;
 	}
 
@@ -247,7 +248,7 @@ PlaceAvailable imageSmoothMoveTo(Image *img, int x, int y, int time, Bool wait){
 		args->x = x;
 		args->y = y;
 		args->time = time;
-		args->result = OK;
+		args->result = AVAILABLE;
 	}
 	if(args != NULL)
 		free(args);

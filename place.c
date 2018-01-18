@@ -105,6 +105,7 @@ Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char 
 
 	result = setUpPlace(place, map);
 	if(result != OK){
+		nprint("CUIDADO, NO CARGA", -1, -1, NUM_ROWS -1, NUM_COLS-1);
 		freePlace(place);
 		free(map);
 		return NULL;
@@ -127,7 +128,7 @@ void printPlace(Place *place){
 			if(place->matrix[j][i] == OC_CHAR)
 				printf("%c", place->wall);
 			else if (place->matrix[j][i] == DOOR_CHAR)
-				printf("%c", place->bg);
+				printf("■");
 				/*The doors have no especial character atm*/
 			else
 				printf("%c", place->bg);
@@ -154,7 +155,7 @@ int printInsidePlace(Place *place, char *text, int color){
 	}
 
 	pthread_mutex_lock(&mutex);
-	_move_cursor_to(place->iRow +2, iCol);
+	_move_cursor_to(place->iRow + 2, iCol);
 	_prepare_font(place->bgColor, color);
 
 	if(strlen(text) < place->nColumns-4){
