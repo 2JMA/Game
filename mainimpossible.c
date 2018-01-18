@@ -204,6 +204,8 @@ int mainImpossible(Place *map, Place *textRect, Place *infoRect, Image *amok){
 	printPlace(textRect);
 	printPlace(infoRect);
 	imagePrint(amok);
+	/*Instructions*/
+	printInsidePlaceRows(infoRect, "CAN YOU SEE WHAT'S THERE?\nTHOSE ARE NAZI BOOTS!\nTRY TO GET THEM, THEY WILL BE VERY USEFULL IN THE NEAR FUTURE.\nBUT BE CAREFOULL AND DON'T GET COUGHT BY THE GUARDS.\nGOOD LUCK!", OR_FG, 4, 1);
 
 
 	/*Game itself*/

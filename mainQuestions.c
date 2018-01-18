@@ -104,22 +104,15 @@ location _read_key() {
  	return dir;   
 }
 
-
-int main(){
+int questionGame(Place* map, Place* textRect, Place* infoRect, character* amok){
 	character **chars, **chars2, *mChar;
-	Image *player, *ai, *bi, *ci, *di;
-	Place* map, *text, *info;
+	Image *ai, *bi, *ci, *di;
 	char* final, correct, answer;
 	PlaceAvailable area;
 	int i, f, k=0;
 
 	_term_init();
 	_init_screen();
-
-	map=createPlace(1, 1, "Maps/FinalLabyrinthMap.txt", OR_BG, WHITE_FG, '#', ' ');
-	text = createPlace(placeGetLastRow(map)+1, placeGetFirstColumn(map), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
-	info = createPlace(placeGetFirstRow(map), placeGetLastColumn(map)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
-	player=createImage( "Images/amok.txt", 3, 3, OR_BG, CYAN_FG, map);
 
 	ai=createImage( "Images/guard.txt", 4, 187, OR_BG, RED_FG, map);
 	bi=createImage( "Images/guard.txt", 17, 9, OR_BG, RED_FG, map);
@@ -131,7 +124,7 @@ int main(){
 
 	chars=(character**)malloc(sizeof(character*)*6);
 
-	chars[0]=iniCharacter("amok", player, 1, NULL, NULL, NULL, NULL);
+	chars[0]=amok;
 
 	chars[1]=iniCharacter("a", ai, 2, NULL, NULL, "When did the war start?\na) 1940\nb) 1939\nc) 1941\n", NULL);
 	chars[2]=iniCharacter("b", bi, 3, NULL, NULL, "Which is our favourite philosopher?\na) Hegel\nb) Kant\nc) Heidegger\n", NULL);
@@ -145,9 +138,9 @@ int main(){
 	}
 
 	printPlace(map);
-	printPlace(text);
-	printPlace(info);
-	imagePrint(player);
+	printPlace(textRect);
+	printPlace(infoRect);
+	imagePrint(charGetImage(amok));
 	imagePrint(ai);
 	imagePrint(bi);
 	imagePrint(ci);
@@ -167,9 +160,9 @@ int main(){
 		}
 
 		if(dir.x==-2 && dir.y==-2){
-			printInsidePlace(text, "The command doesn exist or can be used in this moment.\n", placeGetFgColor(text));
+			printInsidePlace(textRect, "The command doesn't exist or can be used in this moment.\n", placeGetFgColor(textRect));
 		}else{
-			area=imageMove(player, dir.x, dir.y);
+			area=imageMove(charGetImage(amok), dir.x, dir.y);
 			imageMove(ai, 0, 0);
 			imageMove(bi, 0, 0);
 			imageMove(ci, 0, 0);
@@ -177,10 +170,7 @@ int main(){
 		}
 
 		if(area==DOOR){
-			for(i=0; i<5; i++){
-				freeCharacter(chars[i]);
-			}
-			free(chars);
+			charFreeCharacters(chars);
 
 			final=fileToStr("Maps/square1.txt");
 
@@ -190,7 +180,7 @@ int main(){
 
 			printPlace(map);
 			imagePrint(ai);
-			printPlace(text);
+			printPlace(textRect);
 
 			sleep(10000);
 			return 0;
@@ -206,7 +196,7 @@ int main(){
 		if((mChar!=NULL)&&(f==0)){
 			chars2[k]=mChar;
 			k++;
-			charPrintInfo2(mChar, text);
+			charPrintInfo2(mChar, textRect);
 			switch(charGetType(mChar)){
 				case(2):
 					correct='b';
@@ -225,12 +215,12 @@ int main(){
 				scanf("%c", &answer);
 			}while(answer!='a' && answer!='b' && answer!='c');
 			if(answer==correct){
-				printInsidePlace(text, "Correct!! You may continue.\n", placeGetFgColor(text));
+				printInsidePlace(textRect, "Correct!! You may continue.\n", placeGetFgColor(textRect));
 			}
 			else{
-				printInsidePlace(text, "Incorrect answer. Foolish jew, come with me and take a shower.\n", placeGetFgColor(text));
+				printInsidePlace(textRect, "Incorrect answer. Foolish jew, come with me and take a shower.\n", placeGetFgColor(textRect));
 				sleep(5000);
-				for(i=0; i<5; i++){
+				for(i=1; i<5; i++){
 					if(chars[i]) freeImage(charGetImage(chars[i]));
 				}
 
@@ -239,19 +229,18 @@ int main(){
 				}
 				k=0;
 
-				player=createImage( "Images/amok.txt", 3, 3, OR_BG, CYAN_FG, map);
+				moveChar(3, 3, amok);
 				ai=createImage( "Images/guard.txt", 4, 187, OR_BG, RED_FG, map);
 				bi=createImage( "Images/guard.txt", 17, 9, OR_BG, RED_FG, map);
 				ci=createImage( "Images/guard.txt", 29, 187, OR_BG, RED_FG, map);
 				di=createImage( "Images/guard.txt", 42, 9, OR_BG, RED_FG, map);
 
-				charSetImage(chars[0], player);
 				charSetImage(chars[1], ai);
 				charSetImage(chars[2], bi);
 				charSetImage(chars[3], ci);
 				charSetImage(chars[4], di);
 
-				imagePrint(player);
+				imagePrint(charGetImage(amok));
 				imagePrint(ai);
 				imagePrint(bi);
 				imagePrint(ci);
@@ -263,21 +252,31 @@ int main(){
 	}
 
 
-	printInsidePlace(text, "you have depleted the given 1500 moves.\n", placeGetFgColor(text));
+	printInsidePlace(textRect, "you have depleted the given 1500 moves.\n", placeGetFgColor(textRect));
 	sleep(5000);
-	imageClear(player);
 	imageClear(ai);
 	imageClear(bi);
 	imageClear(ci);
 	imageClear(di);
-	freePlace(map);
-	freePlace(text);
-	freePlace(info);
-	for(i=0; i<5; i++){
-		freeCharacter(chars[i]);
-	}
-	free(chars);
+	charFreeCharacters(chars);
 
 	_term_reset();
 	return 0;
+}
+
+int main(){
+	Place* map, *textRect, *infoRect;
+	character *amok;
+	Image* player;
+	int res;
+
+	map=createPlace(1, 1, "Maps/FinalLabyrinthMap.txt", OR_BG, WHITE_FG, '#', ' ');
+	textRect=createPlace(placeGetLastRow(map)+1, placeGetFirstColumn(map),"Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
+	infoRect=createPlace(placeGetFirstRow(map), placeGetLastColumn(map)+1,"Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
+	player=createImage( "Images/amok.txt", 3, 3, OR_BG, CYAN_FG, map);
+
+	amok=iniCharacter("amok", player, 1, NULL, NULL, NULL, NULL);
+
+	res=questionGame(map, textRect, infoRect, amok);
+	return res;
 }
