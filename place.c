@@ -128,7 +128,7 @@ void printPlace(Place *place){
 			if(place->matrix[j][i] == OC_CHAR)
 				printf("%c", place->wall);
 			else if (place->matrix[j][i] == DOOR_CHAR)
-				printf("%c", place->bg);
+				printf("■");
 				/*The doors have no especial character atm*/
 			else
 				printf("%c", place->bg);
