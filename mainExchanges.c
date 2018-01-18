@@ -154,23 +154,14 @@ int exchange(character** chars, Place *text){
 	printInsidePlace(text, "You don't have the necessary object.\n", placeGetFgColor(text));
 	return 0;
 }
-
-int main(){
+int exchangesGame(Place *map, Place *textRect, Place *infoRect, character *amok){
 	character **chars;
-	Image *player, *ai, *bi, *ci, *di, *obj1, *obj2, *obj3, *obj4, *obj5;
-	object **ob_arr, **ob_arr1, **ob_arr2, **ob_arr3, **ob_arr4, *foto, *pan, *cigarrillos, *cuchillo, *sombrero_nazi;
-	Place* map, *text, *info;
-	int ret=0, i;
+	Image *ai, *bi, *ci, *di, *obj1, *obj2, *obj3, *obj4, *obj5;
+	object **ob_arr1, **ob_arr2, **ob_arr3, **ob_arr4, *foto, *pan, *cigarrillos, *cuchillo, *sombrero_nazi;
+	int i, ret=0;
 
 	_term_init();
 	_init_screen();
-
-	map=createPlace(1, 1, "Maps/MapExchanges.txt", OR_BG, WHITE_FG, ',', ' ');
-	text = createPlace(placeGetLastRow(map)+1, placeGetFirstColumn(map), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
-	info = createPlace(placeGetFirstRow(map), placeGetLastColumn(map)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
-
-
-	player=createImage( "Images/amok.txt", 5, 12, OR_BG, CYAN_FG, map);
 
 	ai=createImage( "Images/jew.txt", 48, 11, OR_BG, RED_FG, map);
 	bi=createImage( "Images/jew.txt", 10, 72, OR_BG, RED_FG, map);
@@ -183,21 +174,10 @@ int main(){
 	obj5=createImage( "Images/jew.txt", X_ELSE, Y_ELSE, OR_BG, RED_FG, map);
 
 
-	foto=iniObject("foto", 1, 1, 0, obj1, 0, NULL);
 	pan=iniObject("pan", 2, 0, 0, obj2, 0, NULL);
 	cigarrillos=iniObject("cigarrillos", 3, 0, 0, obj3, 0, NULL);
 	cuchillo=iniObject("cuchillo", 4, 0, 0, obj4, 0, NULL);
 	sombrero_nazi=iniObject("sombrero nazi", 5, 0, 0, obj5, 0, NULL);
-
-	ob_arr=(object**)malloc(sizeof(object*)*10);
-	ob_arr[0]=foto;
-	for(i=1; i<10; i++){
-		ob_arr[i]=NULL;
-	}
-	if(ob_arr[0]==NULL){
-		printf("NULL\n");
-		return -1;
-	}
 
 	ob_arr1=(object**)malloc(sizeof(object*)*10);
 	ob_arr1[0]=pan;
@@ -225,7 +205,7 @@ int main(){
 	
 	chars=(character**)malloc(sizeof(character*)*6);
 
-	chars[0]=iniCharacter("amok", player, 1, ob_arr, NULL, NULL, NULL);
+	chars[0]=amok;
 
 	chars[1]=iniCharacter("a", ai, 2, ob_arr1, foto, "If you have a photograph, I'll give tou some bread.", NULL);
 	chars[2]=iniCharacter("b", bi, 3, ob_arr2, pan, "If you have bread I'll give you a pack of cigarrettes.", NULL);
@@ -234,9 +214,9 @@ int main(){
 	chars[5]=NULL;
 
 	printPlace(map);
-	printPlace(text);
-	printPlace(info);
-	imagePrint(player);
+	printPlace(textRect);
+	printPlace(infoRect);
+	imagePrint(charGetImage(amok));
 	imagePrint(ai);
 	imagePrint(bi);
 	imagePrint(ci);
@@ -248,33 +228,25 @@ int main(){
 
 		dir = _read_key();
 		printPlace(map);
-		imagePrint(player);
+		imagePrint(charGetImage(amok));
 		imagePrint(ai);
 		imagePrint(bi);
 		imagePrint(ci);
 		imagePrint(di);
 		if(dir.x==2 && dir.y==2){
-			ret=exchange(chars, text);
+			ret=exchange(chars, textRect);
 
 			if(ret==-1){
-				imageClear(player);
 				imageClear(ai);
 				imageClear(bi);
 				imageClear(ci);
 				imageClear(di);
-				freePlace(map);
-				freePlace(text);
-				freePlace(info);
-				for(i=0; i<5; i++){
-					freeCharacter(chars[i]);
-				}
-				free(chars);
+				charFreeCharacters(chars);
 				freeObject(foto);
 				freeObject(cigarrillos);
 				freeObject(cuchillo);
 				freeObject(pan);
 				freeObject(sombrero_nazi);
-				free(ob_arr);
 				free(ob_arr1);
 				free(ob_arr2);
 				free(ob_arr3);
@@ -284,26 +256,19 @@ int main(){
 			} 
 
 			if(ret==1){
-				printInsidePlace(text, "HAS GANADO!\n", placeGetFgColor(text));
+				printInsidePlace(textRect, "YOU WON!!\n", placeGetFgColor(textRect));
 				sleep(5000);
-				imageClear(player);
+				imageClear(charGetImage(amok));
 				imageClear(ai);
 				imageClear(bi);
 				imageClear(ci);
 				imageClear(di);
-				freePlace(map);
-				freePlace(text);
-				freePlace(info);
-				for(i=0; i<5; i++){
-					freeCharacter(chars[i]);
-				}
-				free(chars);
+				charFreeCharacters(chars);
 				freeObject(foto);
 				freeObject(cigarrillos);
 				freeObject(cuchillo);
 				freeObject(pan);
 				freeObject(sombrero_nazi);
-				free(ob_arr);
 				free(ob_arr1);
 				free(ob_arr2);
 				free(ob_arr3);
@@ -312,26 +277,19 @@ int main(){
 				return 0;
 			}
 		}else if(dir.x==1 && dir.y==1){
-			charPrintInfo(chars, text);
+			charPrintInfo(chars, textRect);
 		}else if(dir.x==-1 && dir.y==-1){
-			imageClear(player);
+			imageClear(charGetImage(amok));
 			imageClear(ai);
 			imageClear(bi);
 			imageClear(ci);
 			imageClear(di);
-			freePlace(map);
-			freePlace(text);
-			freePlace(info);
-			for(i=0; i<5; i++){
-				freeCharacter(chars[i]);
-			}
-			free(chars);
+			charFreeCharacters(chars);
 			freeObject(foto);
 			freeObject(cigarrillos);
 			freeObject(cuchillo);
 			freeObject(pan);
 			freeObject(sombrero_nazi);
-			free(ob_arr);
 			free(ob_arr1);
 			free(ob_arr2);
 			free(ob_arr3);
@@ -339,9 +297,9 @@ int main(){
 			_term_reset();
 			return -1;
 		}else if(dir.x==-2 && dir.y==-2){
-			printInsidePlace(text, "No existe ese comando.\n", placeGetFgColor(text));
+			printInsidePlace(textRect, "The command does not exist or cannot be used in this moment.\n", placeGetFgColor(textRect));
 		}else{
-			imageMove(player, dir.x, dir.y);
+			imageMove(charGetImage(amok), dir.x, dir.y);
 			imageMove(ai, 0, 0);
 			imageMove(bi, 0, 0);
 			imageMove(ci, 0, 0);
@@ -349,30 +307,47 @@ int main(){
 		}
 		times++;
 	}
-	printInsidePlace(text, "Han pasado los 1500 movimientos.\n", placeGetFgColor(text));
+	printInsidePlace(textRect, "You have depleted the 1500 moves.\n", placeGetFgColor(textRect));
 	sleep(5000);
-	imageClear(player);
+	imageClear(charGetImage(amok));
 	imageClear(ai);
 	imageClear(bi);
 	imageClear(ci);
 	imageClear(di);
-	freePlace(map);
-	freePlace(text);
-	freePlace(info);
-	for(i=0; i<5; i++){
-		freeCharacter(chars[i]);
-	}
-	free(chars);
+	charFreeCharacters(chars);
 	freeObject(foto);
 	freeObject(cigarrillos);
 	freeObject(cuchillo);
 	freeObject(pan);
 	freeObject(sombrero_nazi);
-	free(ob_arr);
 	free(ob_arr1);
 	free(ob_arr2);
 	free(ob_arr3);
 	free(ob_arr4);
 	_term_reset();
 	return 0;
+}
+
+int main(){
+	Place* map, *textRect, *infoRect;
+	character *amok;
+	object* foto, **ob_arr;
+	Image* player, *foto_i;
+	int res, i;
+
+	map=createPlace(1, 1, "Maps/MapExchanges.txt", OR_BG, WHITE_FG, ',', ' ');
+	textRect=createPlace(placeGetLastRow(map)+1, placeGetFirstColumn(map),"Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
+	infoRect=createPlace(placeGetFirstRow(map), placeGetLastColumn(map)+1,"Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
+	player=createImage( "Images/amok.txt", 3, 3, OR_BG, CYAN_FG, map);
+	foto_i=createImage("Images/jew.txt", X_ELSE, Y_ELSE, OR_BG, WHITE_FG, map);
+	foto=iniObject("photograph", 1, 1, 0, foto_i, 0, NULL);
+	ob_arr=(object**)malloc(sizeof(object*)*10);
+	ob_arr[0]=foto;
+	for(i=1; i<10; i++){
+		ob_arr[i]=NULL;
+	}
+	amok=iniCharacter("amok", player, 1, ob_arr, NULL, NULL, NULL);
+
+	res=exchangesGame(map, textRect, infoRect, amok);
+	return res;
 }
