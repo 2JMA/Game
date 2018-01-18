@@ -74,3 +74,50 @@ void exitGame(int mode){
 	_show_cursor();
 	exit(mode);
 }
+
+location _read_key() {
+	char choice;
+  	location dir;
+ 	choice = fgetc(stdin);
+
+	dir.x = 0;
+ 	dir.y = 0;
+
+	if (choice == 27 && fgetc(stdin) == '[') { /* The key is an arrow key */
+	    choice = fgetc(stdin);
+
+	    switch(choice) {
+		    case('A'):
+		  	    dir.y = -1;
+		   		break;
+		    case('B'):
+		      	dir.y = 1;
+		      	break;
+		    case('C'):
+		      	dir.x = 1;
+		      	break;
+		    case('D'):
+		      	dir.x = -1;
+		      	break;
+
+		    /*Exchanges and questions*/  	
+		    case('t'):
+				dir.x=1;
+				dir.y=1;
+				break;
+			case('e'):
+				dir.x=2;
+				dir.y=2;
+				break;
+	    }
+  	}else if(choice == ' '){
+ 	  	/*Shot*/
+ 	  	dir.x = 2;
+ 	  	dir.y = 0;
+ 	}else{
+ 		dir.x = 0;
+ 	  	dir.y = 0;
+ 	}
+
+ 	return dir;   
+}

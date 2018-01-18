@@ -42,4 +42,7 @@ void sleep(unsigned int miliSeconds);
 void multLocation(location *loc, int num);
 void exitGame(int mode);
 
+/*Function that allow us to read the keys*/
+location _read_key();
+
 #endif /* UTILS_H */
