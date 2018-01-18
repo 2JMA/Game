@@ -107,7 +107,7 @@ PlaceAvailable imageChangePosition(Image *img, int x, int y){
 	if(y + img->nRows -1 > NUM_ROWS) return ERROR;
 
 	result = placeAvailable(img->place, x, x + img->nColumns, y, y + img->nRows);
-	if(result == OCCUPIED){
+	if(result == OCCUPIED || result == DOOR){
 		return result;
 	}
 
