@@ -11,6 +11,7 @@
 #include "utils.h"
 
 struct termios initial;
+int win = -1;
 int liveEvil = 6; 
 /*Max time to win, in seconds*/
 double maxTime = 20;
@@ -154,19 +155,20 @@ void *thread_program_running(thread_info_places *args){
 
 	while(1){
 		if(liveEvil == 0){
-			printInsidePlace(args->textRect, "Congratulations!\nYou have beaten the final evil, Marabini, and you should be proud of yourself, not too many people achive it, and this should be a long text in order to test the print funtion.", placeGetFgColor(args->textRect));
+			printInsidePlace(args->textRect, "Congratulations!\nYou have beaten the final evil, Hitler, and you should be proud of yourself, not too many people achive it.", placeGetFgColor(args->textRect));
 			_move_cursor_to(placeGetLastRow(args->textRect)+1, 1);
-			exitGame(0);
+			win = 1;
+			pthread_exit(NULL);
 		}else if( maxTime <= 0){
-			printInsidePlace(args->textRect, "Sorry!\nYou weren't fast enought to beat final evil, Marabini, but don't worry, not too many people achive it.\nYou can try it again if you want", placeGetFgColor(args->textRect));
+			printInsidePlace(args->textRect, "Sorry!\nYou weren't fast enought to beat final evil, Hitler, but don't worry, you have another oportunity. Press any letter to continue.", placeGetFgColor(args->textRect));
 			_move_cursor_to(placeGetLastRow(args->textRect)+1, 1);
-			exitGame(0);
+			win = 0;
+			pthread_exit(NULL);
 		}
 
-		sprintf(infoTextTime, "   Time left: %.02lf secs", maxTime);
+		sprintf(infoTextTime, "   Time left: %.02lf secs\n   Hitler's life: %d", maxTime, liveEvil);
 		sprintf(infoTextLive, "   Hitler's life: %d", liveEvil);
-		printInsidePlaceRows(args->infoRect, infoTextTime, OR_FG, 4, 1);
-		printInsidePlaceRows(args->infoRect, infoTextLive, OR_FG, 4, 2);
+		printInsidePlaceRows(args->infoRect, infoTextTime, OR_FG, 4, 2);
 		maxTime-=0.25;
 		sleep(250);
 	}
@@ -220,7 +222,7 @@ int finalGame(Place *map, Place *textRect, Place *infoRect, Image *amok){
 	pthread_create(&running_thread, NULL, thread_program_running, &infoArgs);
 	pthread_create(&evil_thread, NULL, thread_evil_move, evil);
 
-	while(args.pos == 0){
+	while(win == -1){
 		dir = _read_key();
 		if(dir.x == 2){
 			pthread_create(&shoot_thread, NULL, thread_shoot, &shootArgs);
@@ -239,32 +241,5 @@ int finalGame(Place *map, Place *textRect, Place *infoRect, Image *amok){
 	pthread_cancel(evil_thread);
 
 	freeImage(evil);
-	return 1;
-}
-
-void main(){
-	_term_init();
-	_init_screen();
-
-	Place *place = createPlace(1, 1, "Maps/square1.txt", OR_BG, YELLOW_FG, '#', ' ');
-	Place *textRect = createPlace(placeGetLastRow(place)+1, placeGetFirstColumn(place), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
-	Place *infoRect = createPlace(placeGetFirstRow(place), placeGetLastColumn(place)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
-	Image *amok = createImage("Images/amok.txt", 40, 20 , OR_BG, RED_FG, place);
-	
-
-	/*printf("%d, %d\n", placeGetFirstRow(textRect), placeGetFirstColumn(textRect));
-
-	printInsidePlace(textRect, "You have beaten the final evil, Marabini, and you should be proud of yourself, not too many people achive it, and this should be a long text in order to test the print funtion.", placeGetFgColor(place));
-	exitGame(0);*/
-
-	finalGame(place, textRect, infoRect, amok);
-
-
-	
-	freeImage(amok);
-	freePlace(place);
-	freePlace(textRect);
-	freePlace(infoRect);
-	exitGame(0);
-	return;
+	return win;
 }
