@@ -3,8 +3,8 @@
 
 #define NUM_COLS 240
 #define NUM_ROWS 68
-#define OC_CHAR 1
-#define DOOR_CHAR 2
+#define OC_CHAR '+'
+#define DOOR_CHAR '#'
 /*
 Number of rows and columns of the terminal
 Using tput cols and tput lines on the terminal*/

@@ -18,7 +18,7 @@ in order to move it, you have to clear it, change iRow, iColumn,
 and print it again
 */
 struct _Place{
-	int **matrix;
+	char **matrix;
 	int bgColor, fgColor;
 	int iColumn, iRow;
 	int nColumns, nRows;
@@ -82,7 +82,7 @@ Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char 
 	if(c + place->nColumns -1 > NUM_COLS) place->iColumn = NUM_COLS - place->nColumns;
 	if(r + place->nRows -1 > NUM_ROWS)  place->iRow = NUM_ROWS - place->nRows;
 
-	place->matrix=(int **)malloc(sizeof(int*)*(place->nRows));
+	place->matrix=(char **)malloc(sizeof(char*)*(place->nRows));
 	if(place->matrix == NULL){
 		free(place);
 		free(map);
@@ -91,7 +91,7 @@ Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char 
 
 	for(i=0; i<place->nRows; i++){
 		/*Initialize all the map with zeros*/
-		place->matrix[i] = (int*)calloc(place->nColumns, sizeof(int));
+		place->matrix[i] = (char*)calloc(place->nColumns, sizeof(char));
 		if(place->matrix[i] == NULL){
 			for(j=i; j>=0; j--){
 				free(place->matrix[j]);
@@ -130,6 +130,8 @@ void printPlace(Place *place){
 			else if (place->matrix[j][i] == DOOR_CHAR)
 				printf("■");
 				/*The doors have no especial character atm*/
+			else if (place->matrix[j][i] != ' ')
+				printf("%c", place->matrix[j][i]);
 			else
 				printf("%c", place->bg);
 		}
@@ -276,10 +278,10 @@ Status setUpPlace(Place *p, char *data){
 
 			if(*c == '#'){
 				p->matrix[j][i] = DOOR_CHAR;
-			}else if(*c != ' ' && *c != '\0'){
+			}else if(*c == OC_CHAR){
 				p->matrix[j][i] = OC_CHAR;
-			}else{
-				p->matrix[j][i] = 0;
+			}else if(*c != '\0'){
+				p->matrix[j][i] = *c;
 			}
 			i++;
 		}else{
@@ -310,6 +312,8 @@ PlaceAvailable placeAvailable(Place *p, int xi, int xf, int yi, int yf){
 				return OCCUPIED;
 			else if(p->matrix[i][j] == DOOR_CHAR)
 				return DOOR;
+			else if(p->matrix[i][j] != ' ')
+				return OCCUPIED;
 		}
 	}
 
