@@ -248,7 +248,7 @@ PlaceAvailable imageSmoothMoveTo(Image *img, int x, int y, int time, Bool wait){
 		args->x = x;
 		args->y = y;
 		args->time = time;
-		args->result = OK;
+		args->result = AVAILABLE;
 	}
 	if(args != NULL)
 		free(args);

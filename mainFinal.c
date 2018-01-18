@@ -124,7 +124,7 @@ void *thread_shoot(void *arguments){
 
 	while(1){
 		result = imageMove(bullet, 0, args->move);
-		if(result != OK){
+		if(result != AVAILABLE){
 			imageClear(bullet);
 			freeImage(bullet);
 			pthread_exit(NULL);
