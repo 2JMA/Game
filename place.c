@@ -105,6 +105,7 @@ Place *createPlace(int r, int c, char *fileName, int bgColor, int fgColor, char 
 
 	result = setUpPlace(place, map);
 	if(result != OK){
+		nprint("CUIDADO, NO CARGA", -1, -1, NUM_ROWS -1, NUM_COLS-1);
 		freePlace(place);
 		free(map);
 		return NULL;
@@ -152,9 +153,10 @@ int printInsidePlace(Place *place, char *text, int color){
 	if(place->iColumn <= 0){
 		iCol = 3;
 	}
+	printf("%d\n", iCol);
 
 	pthread_mutex_lock(&mutex);
-	_move_cursor_to(place->iRow +2, iCol);
+	_move_cursor_to(place->iRow, iCol);
 	_prepare_font(place->bgColor, color);
 
 	if(strlen(text) < place->nColumns-4){
@@ -166,17 +168,17 @@ int printInsidePlace(Place *place, char *text, int color){
 			if(*c == '\n'){
 				i = 0;
 				j++;
-				_move_cursor_to(place->iRow +2+j, iCol);
+				_move_cursor_to(place->iRow +j, iCol);
 			}else if(i < place->nColumns-5){
 				n+=printf("%c", *c);
 			}else if(i == place->nColumns-5 && (*c!='\n' || *c!=' ')){
 				n+=printf("-");
 				i = 0;
 				j++;
-				_move_cursor_to(place->iRow +2+j, iCol);
+				_move_cursor_to(place->iRow +j, iCol);
 				n+=printf("%c", *c);
 			}else{
-				_move_cursor_to(place->iRow +2+j, iCol);
+				_move_cursor_to(place->iRow +j, iCol);
 				n+=printf("%c", *c);
 			}
 		}

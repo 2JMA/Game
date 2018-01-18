@@ -85,6 +85,7 @@ Image *createImage(char *fileName, int r, int c, int bgColor, int fgColor, Place
 void freeImage(Image *img){
 	if(img == NULL) return;
 	if(img->src == NULL) return;
+	imageClear(img);
 	free(img->src);
 	free(img);
 }

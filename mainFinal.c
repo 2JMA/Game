@@ -81,41 +81,6 @@ void _term_reset() {
 						    before making this change*/
 }
 
-void *thread_read_key(void *direction) {
-	char choice;
-	location *dir;
-
- 	dir = (location *)direction;
-
- 	while(1){
- 		choice = fgetc(stdin);
-
-		if(choice == ' '){
- 	  		/*Shot*/
- 	  		dir->x = 2;
- 	  	}else if (choice == 27 && fgetc(stdin) == '[') { /* The key is an arrow key */
- 		    choice = fgetc(stdin);
- 	
- 		    switch(choice) {
- 			    case('A'):
- 			  	    dir->y = -1;
- 			   		break;
- 			    case('B'):
- 			      	dir->y = 1;
- 			      	break;
- 			    case('C'):
- 			      	dir->x = 1;
- 			      	break;
- 			    case('D'):
- 			      	dir->x = -1;
- 			      	break;
- 		    }
- 	  	}
- 	
- 	 	choice = 0;
- 	}
-}
-
 location _read_key() {
 	char choice;
   	location dir;
@@ -220,7 +185,7 @@ void *thread_shoot(void *arguments){
 
 void *thread_program_running(void *p){
 	if(p == NULL){
-		printf("ES NULL\n");
+		nprint("ES NULL\n", -1, -1, -1, -1);
 		exit(0);
 	} 
 	Place *place;
@@ -243,7 +208,7 @@ void *thread_program_running(void *p){
 
 void main(){
 	char line[MAX_LINE];
-	pthread_t read_keys, near_thread, evil_thread, shoot_thread, running_thread;
+	pthread_t evil_thread, shoot_thread, running_thread;
 	location dir;
 	thread_near_args args;
 	thread_shoot_args shootArgs;
@@ -254,7 +219,7 @@ void main(){
 	Place *place = createPlace(1, 1, "Maps/square1.txt", OR_BG, YELLOW_FG, '#', ' ');
 	Place *textRect = createPlace(placeGetLastRow(place)+1, placeGetFirstColumn(place), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
 	Place *infoRect = createPlace(placeGetFirstRow(place), placeGetLastColumn(place)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
-	Image *iBear = createImage("Images/bear.txt", 40, 20 , OR_BG, RED_FG, place);
+	Image *iBear = createImage("Images/amok.txt", 40, 20 , OR_BG, RED_FG, place);
 	Image *evil = createImage("Images/boo.txt", 3, 20 , OR_BG, CYAN_FG, place);
 
 	printPlace(place);
@@ -274,14 +239,10 @@ void main(){
 
 	shootArgs.shooter = iBear;
 	shootArgs.place = place;
-	/*TODO Reservar memoria bien*/
 	shootArgs.evil = evil;
 	shootArgs.move = -1;
 
-
-	/*pthread_create(&read_keys, NULL, thread_read_key, &dir);*/
 	pthread_create(&running_thread, NULL, thread_program_running, textRect);
-	/*pthread_create(&near_thread, NULL, thread_imagesNear, &args);*/
 	pthread_create(&evil_thread, NULL, thread_evil_move, evil);
 
 	while(args.pos == 0){
@@ -299,9 +260,10 @@ void main(){
 		}
 	}
 
-	/*pthread_cancel(read_keys);*/
+	pthread_cancel(running_thread);
+	pthread_cancel(evil_thread);
 	freeImage(iBear);
-	freeImage(evil);;
+	freeImage(evil);
 	freePlace(place);
 	_term_reset();
 	return;

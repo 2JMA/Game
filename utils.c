@@ -1,7 +1,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <termios.h>
 #include <time.h>
+#include "nprint.h"
 #include "utils.h"
 #include "types.h"
 
@@ -58,4 +60,16 @@ void multLocation(location *loc, int num){
 
 	(loc->x) *= num;
 	(loc->y) *= num;
+}
+void exitGame(int mode){
+	struct termios new;	       
+	tcgetattr(fileno(stdin), &new);    
+	new.c_lflag &= ICANON;	              
+	new.c_lflag &= ECHO;
+	new.c_cc[VMIN] = 1;
+	new.c_cc[VTIME] = 0;	         
+	tcsetattr(fileno(stdin), TCSANOW, &new);
+	_move_cursor_to(NUM_ROWS-1, NUM_COLS-1);
+	_show_cursor();
+	exit(mode);
 }
