@@ -183,7 +183,7 @@ void main(){
 	Place *textRect = createPlace(placeGetLastRow(place)+1, placeGetFirstColumn(place), "Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
 	Place *infoRect = createPlace(placeGetFirstRow(place), placeGetLastColumn(place)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
 	Image *iBear = createImage("Images/amok.txt", 40, 20 , OR_BG, RED_FG, place);
-	Image *evil = createImage("Images/boo.txt", 3, 20 , OR_BG, CYAN_FG, place);
+	Image *evil = createImage("Images/hitler.txt", 3, 20 , OR_BG, CYAN_FG, place);
 
 	/*printf("%d, %d\n", placeGetFirstRow(textRect), placeGetFirstColumn(textRect));
 
