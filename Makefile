@@ -4,7 +4,7 @@ CFLAGS= -g -Wall -ansi -pedantic
 LMFLAGS = -lm
 THREADFLAGS = -pthread
 #CFLAGS = -g -O3 -ansi -pedantic
-EJS = main mainImpossible mainExchanges mainFinal 
+EJS = main mainImpossible mainExchanges mainFinal mainQuestions
 ########################################################
 OBJECTSMAIN = nprint.o image.o place.o utils.o resources.o objects.o character.o
 ########################################################
@@ -22,6 +22,9 @@ mainExchanges: $(OBJECTSMAIN)
 
 mainFinal: $(OBJECTSMAIN)
 	$(CC) $(CFLAGS) -o mainFinal mainFinal.c $(OBJECTSMAIN) $(LMFLAGS) $(THREADFLAGS)
+
+mainQuestions: $(OBJECTSMAIN)
+	$(CC) $(CFLAGS) -o mainQuestions mainQuestions.c $(OBJECTSMAIN) $(LMFLAGS) $(THREADFLAGS)
 
 nprint.o: nprint.c nprint.h
 	$(CC) $(CFLAGS) -c nprint.c
