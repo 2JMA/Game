@@ -10,29 +10,10 @@
 #include "image.h"
 #include "utils.h"
 
-/*From nprint*/
-#define OR_BG 40
-#define OR_FG 37
-
-#define MAX_LINE 301
-#define CYAN_FG 36
-#define RED_FG 31
-#define MAGENTA_FG 35
-#define YELLOW_FG 33
-
-#define CYAN_BG 46
-#define RED_BG 41
-#define MAGENTA_BG 45
-
-#define WHITE_BG 47
-#define WHITE_FG 37
-#define BLACK_BG 40
-#define BLACK_FG 30
-
 struct termios initial;
 int liveEvil = 6; 
 /*Max time to win, in seconds*/
-double maxTime = 15;
+double maxTime = 20;
 
 /*
   Initializes the terminal in such a way that we can read the input
@@ -118,24 +99,6 @@ location _read_key() {
  	return dir;   
 }
 
-void* thread_imagesNear(void *arguments){
-	int i;
-	Position p;
-	if(arguments == NULL) return NULL;
-	thread_near_args *args;
-	args = (thread_near_args *)arguments;
-	while(1){
-		for(i=1; i<args->numImg; i++){
-			p = imagesNear(args->img[0], args->img[i]);
-			if(p == INSIDE){
-				args->pos = p;
-				pthread_exit(NULL);
-				return NULL;
-			}
-		}
-	}
-}
-
 void *thread_evil_move(void *image){
 	Image *img;
 	if(image == NULL) return NULL;
@@ -159,7 +122,7 @@ void *thread_shoot(void *arguments){
 	bullet = createImage("Images/bullet.txt", getImageY(args->shooter)+args->move, getImageX(args->shooter) , OR_BG, YELLOW_FG, args->place);
 	imagePrint(bullet);
 
-	for(i = getImageY(bullet); i > getImageY(bullet)-50; i--){
+	while(1){
 		result = imageMove(bullet, 0, args->move);
 		if(result != OK){
 			imageClear(bullet);
@@ -186,7 +149,7 @@ void *thread_shoot(void *arguments){
 void *thread_program_running(void *p){
 	if(p == NULL){
 		nprint("ES NULL\n", -1, -1, -1, -1);
-		exit(0);
+		exitGame(0);
 	} 
 	Place *place;
 	place = (Place *) p;
@@ -194,11 +157,11 @@ void *thread_program_running(void *p){
 		if(liveEvil == 0){
 			printInsidePlace(place, "Congratulations!\nYou have beaten the final evil, Marabini, and you should be proud of yourself, not too many people achive it, and this should be a long text in order to test the print funtion.", placeGetFgColor(place));
 			_move_cursor_to(placeGetLastRow(place)+1, 1);
-			exit(0);
+			exitGame(0);
 		}else if( maxTime <= 0){
 			printInsidePlace(place, "Sorry!\nYou weren't fast enought to beat final evil, Marabini, but don't worry, not too many people achive it.\nYou can try it again if you want", placeGetFgColor(place));
 			_move_cursor_to(placeGetLastRow(place)+1, 1);
-			exit(0);
+			exitGame(0);
 		}
 
 		maxTime-=0.5;
@@ -221,6 +184,11 @@ void main(){
 	Place *infoRect = createPlace(placeGetFirstRow(place), placeGetLastColumn(place)+1, "Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
 	Image *iBear = createImage("Images/amok.txt", 40, 20 , OR_BG, RED_FG, place);
 	Image *evil = createImage("Images/boo.txt", 3, 20 , OR_BG, CYAN_FG, place);
+
+	/*printf("%d, %d\n", placeGetFirstRow(textRect), placeGetFirstColumn(textRect));
+
+	printInsidePlace(textRect, "You have beaten the final evil, Marabini, and you should be proud of yourself, not too many people achive it, and this should be a long text in order to test the print funtion.", placeGetFgColor(place));
+	exitGame(0);*/
 
 	printPlace(place);
 	printPlace(textRect);
@@ -265,6 +233,6 @@ void main(){
 	freeImage(iBear);
 	freeImage(evil);
 	freePlace(place);
-	_term_reset();
+	exitGame(0);
 	return;
 }
