@@ -115,7 +115,6 @@ void *thread_shoot(void *arguments){
 	Position p;
 	thread_shoot_args *args;
 	Image *bullet;
-	int i, j;
 
 	if(arguments == NULL) return NULL;
 	args = (thread_shoot_args *)arguments;
@@ -146,26 +145,30 @@ void *thread_shoot(void *arguments){
 	pthread_exit(NULL);
 }
 
-void *thread_program_running(void *p){
-	if(p == NULL){
+void *thread_program_running(thread_info_places *args){
+	char infoTextTime[100], infoTextLive[100];
+	if(args == NULL){
 		nprint("ES NULL\n", -1, -1, -1, -1);
 		exitGame(0);
 	} 
-	Place *place;
-	place = (Place *) p;
+
 	while(1){
 		if(liveEvil == 0){
-			printInsidePlace(place, "Congratulations!\nYou have beaten the final evil, Marabini, and you should be proud of yourself, not too many people achive it, and this should be a long text in order to test the print funtion.", placeGetFgColor(place));
-			_move_cursor_to(placeGetLastRow(place)+1, 1);
+			printInsidePlace(args->textRect, "Congratulations!\nYou have beaten the final evil, Marabini, and you should be proud of yourself, not too many people achive it, and this should be a long text in order to test the print funtion.", placeGetFgColor(args->textRect));
+			_move_cursor_to(placeGetLastRow(args->textRect)+1, 1);
 			exitGame(0);
 		}else if( maxTime <= 0){
-			printInsidePlace(place, "Sorry!\nYou weren't fast enought to beat final evil, Marabini, but don't worry, not too many people achive it.\nYou can try it again if you want", placeGetFgColor(place));
-			_move_cursor_to(placeGetLastRow(place)+1, 1);
+			printInsidePlace(args->textRect, "Sorry!\nYou weren't fast enought to beat final evil, Marabini, but don't worry, not too many people achive it.\nYou can try it again if you want", placeGetFgColor(args->textRect));
+			_move_cursor_to(placeGetLastRow(args->textRect)+1, 1);
 			exitGame(0);
 		}
 
-		maxTime-=0.5;
-		sleep(500);
+		sprintf(infoTextTime, "   Time left: %.02lf secs", maxTime);
+		sprintf(infoTextLive, "   Hitler's life: %d", liveEvil);
+		printInsidePlaceRows(args->infoRect, infoTextTime, OR_FG, 4, 1);
+		printInsidePlaceRows(args->infoRect, infoTextLive, OR_FG, 4, 2);
+		maxTime-=0.25;
+		sleep(250);
 	}
 }
 
@@ -173,13 +176,14 @@ int finalGame(Place *map, Place *textRect, Place *infoRect, Image *amok){
 	pthread_t evil_thread, shoot_thread, running_thread;
 	location dir;
 	thread_near_args args;
+	thread_info_places infoArgs;
 	thread_shoot_args shootArgs;
 
 	char *mapStr;
 	Status result;
 	/*Set up the images and places*/
 	Image *evil = createImage("Images/hitler.txt", 3, 20 , OR_BG, CYAN_FG, map);
-	result = imageMoveTo(amok, 100, 20);
+	result = imageMoveTo(amok, 100, 40);
 	mapStr = fileToStr("Maps/square1.txt");
 	if(mapStr == NULL) return -1;
 	result = setUpPlace(map, mapStr);
@@ -210,7 +214,10 @@ int finalGame(Place *map, Place *textRect, Place *infoRect, Image *amok){
 	shootArgs.evil = evil;
 	shootArgs.move = -1;
 
-	pthread_create(&running_thread, NULL, thread_program_running, textRect);
+	infoArgs.textRect = textRect;
+	infoArgs.infoRect = infoRect;
+
+	pthread_create(&running_thread, NULL, thread_program_running, &infoArgs);
 	pthread_create(&evil_thread, NULL, thread_evil_move, evil);
 
 	while(args.pos == 0){
