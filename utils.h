@@ -23,11 +23,10 @@ typedef struct thread_shoot_args{
 typedef struct thread_guard_args{
     Image *amok;
     Place *textRect;
-    int speed;
     int numImg;
-    int *moveType;
     Image **images;
     location *moveDir;
+    int res, level, speed;
 }thread_guard_args;
 
 
