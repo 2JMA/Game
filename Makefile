@@ -4,9 +4,9 @@ CFLAGS= -g -Wall -ansi -pedantic
 LMFLAGS = -lm
 THREADFLAGS = -pthread
 #CFLAGS = -g -O3 -ansi -pedantic
-EJS = main mainImpossible mainExchanges mainFinal mainQuestions
+EJS = main 
 ########################################################
-OBJECTSMAIN = nprint.o image.o place.o utils.o resources.o objects.o character.o
+OBJECTSMAIN = nprint.o image.o place.o utils.o resources.o objects.o character.o mainImpossible.o mainExchanges.o mainFinal.o mainQuestions.o
 ########################################################
 
 all: $(EJS)
@@ -14,17 +14,17 @@ all: $(EJS)
 main: $(OBJECTSMAIN)
 	$(CC) $(CFLAGS) -o main main.c $(OBJECTSMAIN) $(LMFLAGS) $(THREADFLAGS)
 
-mainImpossible: $(OBJECTSMAIN)
-	$(CC) $(CFLAGS) -o mainImpossible mainimpossible.c $(OBJECTSMAIN) $(LMFLAGS) $(THREADFLAGS)
+mainImpossible.o: mainImpossible.c mainImpossible.h
+	$(CC) $(CFLAGS) -c mainImpossible.c
 
-mainExchanges: $(OBJECTSMAIN)
-	$(CC) $(CFLAGS) -o mainExchanges mainExchanges.c $(OBJECTSMAIN) $(LMFLAGS) $(THREADFLAGS)
+mainExchanges.o: mainExchanges.c mainExchanges.h
+	$(CC) $(CFLAGS) -c mainExchanges.c 
 
-mainFinal: $(OBJECTSMAIN)
-	$(CC) $(CFLAGS) -o mainFinal mainFinal.c $(OBJECTSMAIN) $(LMFLAGS) $(THREADFLAGS)
+mainFinal.o: mainFinal.c mainFinal.h
+	$(CC) $(CFLAGS) -c mainFinal.c
 
-mainQuestions: $(OBJECTSMAIN)
-	$(CC) $(CFLAGS) -o mainQuestions mainQuestions.c $(OBJECTSMAIN) $(LMFLAGS) $(THREADFLAGS)
+mainQuestions.o: mainQuestions.c mainQuestions.h
+	$(CC) $(CFLAGS) -c mainQuestions.c
 
 nprint.o: nprint.c nprint.h
 	$(CC) $(CFLAGS) -c nprint.c

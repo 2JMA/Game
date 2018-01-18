@@ -90,7 +90,8 @@ void *thread_program_running(thread_info_places *args){
 	}
 }
 
-int finalGame(Place *map, Place *textRect, Place *infoRect, Image *amok){
+int finalGame(Place *map, Place *textRect, Place *infoRect, character *Camok){
+	Image *amok;
 	pthread_t evil_thread, shoot_thread, running_thread;
 	location dir;
 	thread_near_args args;
@@ -100,6 +101,7 @@ int finalGame(Place *map, Place *textRect, Place *infoRect, Image *amok){
 	char *mapStr;
 	Status result;
 	/*Set up the images and places*/
+	amok = charGetImage(Camok);
 	Image *evil = createImage("Images/hitler.txt", 3, 20 , OR_BG, CYAN_FG, map);
 	result = imageMoveTo(amok, 100, 40);
 	mapStr = fileToStr("Maps/square1.txt");

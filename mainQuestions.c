@@ -9,110 +9,19 @@
 #include "place.h"
 #include "nprint.h"
 #include "utils.h"
+#include "mainQuestions.h"
 
 
-struct termios initial;
-
-/*
-  Initializes the terminal in such a way that we can read the input
-  without echo on the screen
-*/
-void _term_init() {
-	struct termios new;	          /*a termios structure contains a set of attributes about 
-					  how the terminal scans and outputs data*/
-		
-	tcgetattr(fileno(stdin), &initial);    /*first we get the current settings of out 
-						 terminal (fileno returns the file descriptor 
-						 of stdin) and save them in initial. We'd better 
-						 restore them later on*/
-	new = initial;	                      /*then we copy them into another one, as we aren't going 
-						to change ALL the values. We'll keep the rest the same */
-	new.c_lflag &= ~ICANON;	              /*here we are setting up new. This line tells to stop the 
-						canonical mode (which means waiting for the user to press 
-						enter before sending)*/
-	new.c_lflag &= ~ECHO;                 /*by deactivating echo, we tell the terminal NOT TO 
-						show the characters the user is pressing*/
-	new.c_cc[VMIN] = 1;                  /*this states the minimum number of characters we have 
-					       to receive before sending is 1 (it means we won't wait 
-					       for the user to press 2,3... letters)*/
-	new.c_cc[VTIME] = 0;	              /*I really have no clue what this does, it must be somewhere in the book tho*/
-	/*new.c_lflag &= ~ISIG;                 here we discard signals: the program won't end even if we 
-						press Ctrl+C or we tell it to finish*/
-
-	tcsetattr(fileno(stdin), TCSANOW, &new);  /*now we SET the attributes stored in new to the 
-						    terminal. TCSANOW tells the program not to wait 
-						    before making this change*/
-}
-
-void _term_reset() {
-	struct termios new;	          /*a termios structure contains a set of attributes about 
-					  how the terminal scans and outputs data*/
-		
-	tcgetattr(fileno(stdin), &initial);    /*first we get the current settings of out 
-						 terminal (fileno returns the file descriptor 
-						 of stdin) and save them in initial. We'd better 
-						 restore them later on*/
-	new = initial;	                      /*then we copy them into another one, as we aren't going 
-						to change ALL the values. We'll keep the rest the same */
-
-	tcsetattr(fileno(stdin), TCSANOW, &new);  /*now we SET the attributes stored in new to the 
-						    terminal. TCSANOW tells the program not to wait 
-						    before making this change*/
-}
-
-
-location _read_key() {
-	char choice;
-  	location dir;
- 	choice = fgetc(stdin);
-
-	dir.x = 0;
- 	dir.y = 0;
-
-	if (choice == 27 && fgetc(stdin) == '[') { /* The key is an arrow key */
-	    choice = fgetc(stdin);
-
-	    switch(choice) {
-		    case('A'):
-		  	    dir.y = -1;
-		   		break;
-		    case('B'):
-		      	dir.y = 1;
-		      	break;
-		    case('C'):
-		      	dir.x = 1;
-		      	break;
-		    case('D'):
-		      	dir.x = -1;
-		      	break;
-	    }
-  	}else{
-  		switch(choice){
-			case('t'):
-				dir.x=1;
-				dir.y=1;
-				break;
-			case('e'):
-				dir.x=2;
-				dir.y=2;
-				break;
-			default:
-				dir.x=-2;
-				dir.y=-2;
-		}
-  	}
- 	return dir;   
-}
 
 int questionGame(Place* map, Place* textRect, Place* infoRect, character* amok){
 	character **chars, **chars2, *mChar;
 	Image *ai, *bi, *ci, *di;
-	char* final, correct, answer;
+	char* final, *qu_map, correct, answer;
 	PlaceAvailable area;
 	int i, f, k=0;
 
-	_term_init();
-	_init_screen();
+	qu_map=fileToStr("Maps/FinalLabyrinthMap.txt");
+	setUpPlace(map, qu_map);
 
 	ai=createImage( "Images/guard.txt", 4, 187, OR_BG, RED_FG, map);
 	bi=createImage( "Images/guard.txt", 17, 9, OR_BG, RED_FG, map);
@@ -145,6 +54,11 @@ int questionGame(Place* map, Place* textRect, Place* infoRect, character* amok){
 	imagePrint(bi);
 	imagePrint(ci);
 	imagePrint(di);
+
+	printInsidePlaceRows(infoRect, "objects: nazi boots, nazi hat, nazi uniform", OR_BG, 3, 1);
+	printInsidePlaceRows(infoRect, "", OR_BG, 3, 1);
+	printInsidePlaceRows(infoRect, "move: arrow keys\n talk: t\n exchange: e", OR_BG, 3, 2);
+	printInsidePlaceRows(infoRect, "Talk to people and try to trade your items with them.", OR_BG, 3, 3);
 
 	location dir;
 	int times = 0;
@@ -260,23 +174,5 @@ int questionGame(Place* map, Place* textRect, Place* infoRect, character* amok){
 	imageClear(di);
 	charFreeCharacters(chars);
 
-	_term_reset();
 	return 0;
-}
-
-int main(){
-	Place* map, *textRect, *infoRect;
-	character *amok;
-	Image* player;
-	int res;
-
-	map=createPlace(1, 1, "Maps/FinalLabyrinthMap.txt", OR_BG, WHITE_FG, '#', ' ');
-	textRect=createPlace(placeGetLastRow(map)+1, placeGetFirstColumn(map),"Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
-	infoRect=createPlace(placeGetFirstRow(map), placeGetLastColumn(map)+1,"Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
-	player=createImage( "Images/amok.txt", 3, 3, OR_BG, CYAN_FG, map);
-
-	amok=iniCharacter("amok", player, 1, NULL, NULL, NULL, NULL);
-
-	res=questionGame(map, textRect, infoRect, amok);
-	return res;
 }

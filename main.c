@@ -9,27 +9,12 @@
 #include "place.h"
 #include "image.h"
 #include "utils.h"
+#include "mainExchanges.h"
+#include "mainImpossible.h"
+#include "mainFinal.h"
+#include "mainQuestions.h"
 
 
-
-/*From nprint*/
-#define OR_BG 40
-#define OR_FG 37
-
-#define MAX_LINE 301
-#define CYAN_FG 36
-#define RED_FG 31
-#define MAGENTA_FG 35
-#define YELLOW_FG 33
-
-#define CYAN_BG 46
-#define RED_BG 41
-#define MAGENTA_BG 45
-
-#define WHITE_BG 47
-#define WHITE_FG 37
-#define BLACK_BG 40
-#define BLACK_FG 30
 
 struct termios initial;
 
@@ -64,87 +49,107 @@ void _term_init() {
 						    before making this change*/
 }
 
-void _term_reset() {
-	struct termios new;	          /*a termios structure contains a set of attributes about
-					  how the terminal scans and outputs data*/
+int main(){
+	 _term_init();
+	 _init_screen();
 
-	tcgetattr(fileno(stdin), &initial);    /*first we get the current settings of out
-						 terminal (fileno returns the file descriptor
-						 of stdin) and save them in initial. We'd better
-						 restore them later on*/
-	new = initial;	                      /*then we copy them into another one, as we aren't going
-						to change ALL the values. We'll keep the rest the same */
+	Place* map, *textRect, *infoRect;
+	character *amok;
+	object* foto, **ob_arr;
+	Image* player, *foto_i, *ini, *ini2, *ini3, *ini4, *ini5, *ini6;
+	char buffer;
+	int res, i;
 
-	tcsetattr(fileno(stdin), TCSANOW, &new);  /*now we SET the attributes stored in new to the
-						    terminal. TCSANOW tells the program not to wait
-						    before making this change*/
-}
+	map=createPlace(1, 1, "Maps/cover.txt", OR_BG, OR_FG, '#', ' ');
+	printPlace(map);
+	scanf("%c", &buffer);
 
-location _read_key() {
-	char choice;
-  	location dir;
- 	choice = fgetc(stdin);
+	map=createPlace(1, 1, "Maps/square1.txt", OR_BG, OR_FG, '#', ' ');
+	textRect=createPlace(placeGetLastRow(map)+1, placeGetFirstColumn(map),"Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
+	infoRect=createPlace(placeGetFirstRow(map), placeGetLastColumn(map)+1,"Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
+	printPlace(map);
+	printPlace(textRect);
+	printPlace(infoRect);
+	ini=createImage("Images/amokfree.txt", 18, 54, OR_BG, OR_FG, map);
+	imagePrint(ini);
+	printInsidePlace(textRect, "Hi, my name is Amok Ocilite, and I'm jew. I've been in this concentration camp since forever, Tis is a torture, I miss my family, i want to break free.", OR_FG);
+	scanf("%c", &buffer);
 
-	dir.x = 0;
- 	dir.y = 0;
+	ini2=createImage("Images/AgainstGermany.txt", 12, 71, OR_BG, OR_FG, map);
+	imagePrint(ini2);
+	printInsidePlace(textRect, "This camp is full of nazi soldiers, but I think I've found a way to sneak out. If i manage to get a full nazi soldier suit, i may be able to escape without being noticed. I have to try it! I have nothing to lose!", OR_FG);
+	scanf("%c", &buffer);
 
-	if (choice == 27 && fgetc(stdin) == '[') { /* The key is an arrow key */
-	    choice = fgetc(stdin);
+	ini3=createImage("Images/Chapter1.txt", 13, 65, OR_BG, OR_FG, map);
+	imagePrint(ini3);
+	printInsidePlace(textRect, "Lets start by bribing the guard.", OR_FG);
+	scanf("%c", &buffer);
 
-	    switch(choice) {
-		    case('A'):
-		  	    dir.y = -1;
-		   		break;
-		    case('B'):
-		      	dir.y = 1;
-		      	break;
-		    case('C'):
-		      	dir.x = 1;
-		      	break;
-		    case('D'):
-		      	dir.x = -1;
-		      	break;
-	    }
-  	}else{
-  		dir.x = -1;
-		dir.y = -1;
-  	}
- 	return dir;
-}
-
-void main(){
-	int MAX_X, MAX_Y;
-	char line[MAX_LINE];
-
-	_term_init();
-	_init_screen();
-
-	Place *place = createPlace(10, 10, "Maps/map.txt", OR_BG, YELLOW_FG, '#', '.');
-	Image *iBear = createImage("Images/bear.txt", 11, 20 , OR_BG, RED_FG, place);
-	Image *iCute = createImage("Images/emoji2.txt", 15, 20 , OR_BG, CYAN_FG, place);
-
-	printPlace(place);
-	imagePrint(iBear);
-	imagePrint(iCute);
-
-	location dir;
-	PlaceAvailable result;
-	Position near1;
-	int times = 0;
-	while(times < 200){
-
-		dir = _read_key();
-		result = imageMove(iBear, dir.x, dir.y);
-		times++;
-		/*
-		printImageData(iBear);
-		
-		near1 = imagesNear(iCute, iBear);
-		_move_cursor_to(0, 0);
-		printf("%d", result);*/
+	map=createPlace(1, 1, "Maps/square1.txt", OR_BG, OR_FG, '#', ' ');
+	textRect=createPlace(placeGetLastRow(map)+1, placeGetFirstColumn(map),"Maps/square3.txt", OR_BG, CYAN_FG, '#', ' ');
+	infoRect=createPlace(placeGetFirstRow(map), placeGetLastColumn(map)+1,"Maps/square2.txt", OR_BG, RED_FG, '#', ' ');
+	player=createImage( "Images/amok.txt", 3, 3, OR_BG, CYAN_FG, map);
+	foto_i=createImage("Images/jew.txt", X_ELSE, Y_ELSE, OR_BG, OR_FG, map);
+	foto=iniObject("photograph", 1, 1, 0, foto_i, 0, NULL);
+	ob_arr=(object**)malloc(sizeof(object*)*10);
+	ob_arr[0]=foto;
+	for(i=1; i<10; i++){
+		ob_arr[i]=NULL;
 	}
+	amok=iniCharacter("amok", player, 1, ob_arr, NULL, NULL, NULL);
 
-	freeImage(iBear);
-	freePlace(place);
-	_term_reset();
+	printInsidePlaceRows(infoRect, "clothes:", OR_BG, 4, 1);
+	printInsidePlaceRows(infoRect, "move: arrow keys\n talk: t\n exchange: e\n shoot: space bar", OR_BG, 4, 3);
+	res=exchangesGame(map, textRect, infoRect, amok);
+	if(res==-1) return -1;
+	printInsidePlaceRows(infoRect, "clothes: nazi hat", OR_BG, 4, 1);
+
+
+	map = createPlace(1, 1, "Maps/square1.txt", OR_BG, OR_FG, '#', ' ');
+	printPlace(map);
+	ini4=createImage("Images/Chapter2.txt", 13, 65, OR_BG, OR_FG, map);
+	imagePrint(ini4);
+	printInsidePlace(textRect, "Now it's time to sneak past the guards.", OR_FG);
+	scanf("%c", &buffer);
+
+
+	mainImpossible(map, textRect, infoRect, amok);
+	printInsidePlaceRows(infoRect, "clothes: nazi hat, nazi boots", OR_BG, 4, 1);
+
+
+	map = createPlace(1, 1, "Maps/square1.txt", OR_BG, OR_FG, '#', ' ');
+	printPlace(map);
+	ini5=createImage("Images/Chapter3.txt", 13, 65, OR_BG, OR_FG, map);
+	imagePrint(ini4);
+	printInsidePlace(textRect, "Lets kill fuckin' Hitler.", OR_FG);
+	scanf("%c", &buffer);
+
+	do{
+		res=finalGame(map, textRect, infoRect, amok);
+	}while(res!=1);
+	printInsidePlaceRows(infoRect, "clothes: nazi hat, nazi boots, nazi uniform", OR_BG, 4, 1);
+
+
+	map = createPlace(1, 1, "Maps/square1.txt", OR_BG, OR_FG, '#', ' ');
+	printPlace(map);
+	ini6=createImage("Images/Chapter4.txt", 13, 65, OR_BG, OR_FG, map);
+	imagePrint(ini4);
+	printInsidePlace(textRect, "Take care on your decisions.", OR_FG);
+	scanf("%c", &buffer);
+
+	res=questionGame(map, textRect, infoRect, amok);
+	if(res==-1) return -1;
+
+	freeImage(ini);
+	freeImage(ini2);
+	freeImage(ini3);
+	freeImage(ini4);
+	freeImage(ini5);
+	freeImage(ini6);
+	freePlace(map);
+	freePlace(textRect);
+	freePlace(infoRect);
+
+	exitGame(0);
+	return 0;
 }
